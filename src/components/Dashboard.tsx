@@ -82,12 +82,14 @@ export default function Dashboard({ data, contracts, onNavigateToContracts, onSe
   const todayStr = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
   const today = new Date(todayStr + 'T00:00:00');
 
-  // Formatar data em português: "22 de Maio, 2026"
+  // Formatar data em português: "Sexta-feira, 22 de Maio de 2026"
   const dayStr = today.getDate();
   const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const monthName = months[today.getMonth()];
   const yearStr = today.getFullYear();
-  const formattedBaselineDate = `${dayStr} de ${monthName}, ${yearStr}`;
+  const weekDays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+  const weekDayName = weekDays[today.getDay()];
+  const formattedBaselineDate = `${weekDayName}, ${dayStr} de ${monthName} de ${yearStr}`;
 
   const trimesterEndStr = getOffsetDateStr(todayStr, 90);
   const semestreEndStr = getOffsetDateStr(todayStr, 180);
