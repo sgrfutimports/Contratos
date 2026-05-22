@@ -141,10 +141,10 @@ export default function Dashboard({ data, contracts, onNavigateToContracts, onSe
         <div>
           <h1 className="text-2xl font-display font-semibold text-white tracking-tight flex items-center gap-2">
             <ShieldCheck className="h-7 w-7 text-emerald-400 shrink-0" />
-            Controladoria de Contratos Gerais
+            Controladoria de Contratos
           </h1>
           <p className="text-sm font-sans text-slate-300 mt-1">
-            71º Batalhão de Infantaria Motorizado &bull; Auditoria de Vigências e Fiscalizações Estáveis.
+            71º Batalhão de Infantaria Motorizado &bull; Auditoria de Vigências e Fiscalizações
           </p>
         </div>
         <div className="mt-4 md:mt-0 px-4 py-2 bg-emerald-950 border border-emerald-800 text-emerald-400 font-mono text-xs rounded-lg flex items-center gap-2">

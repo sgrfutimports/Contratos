@@ -106,8 +106,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         <p className="mt-0.5 text-center text-xs sm:text-sm font-sans text-emerald-400 font-medium tracking-wide uppercase">
           71º Batalhão de Infantaria Motorizado
         </p>
-        <p className="mt-0.5 text-center text-[10px] sm:text-xs font-mono text-slate-400">
-          Batalhão Duarte Coelho
+        <p className="mt-0.5 text-center text-[10px] sm:text-xs font-mono text-slate-400 uppercase tracking-wider">
+          BATALHÃO DUARTE COELHO
+        </p>
+        <p className="mt-0.5 text-center text-[9px] sm:text-[10px] font-mono text-emerald-500/90 font-medium tracking-wider">
+          PRONTIDÃO e OPERACIONALIDADE
         </p>
       </div>
 

@@ -1411,7 +1411,7 @@ export default function App() {
               </div>
               <div>
                 <span className="font-display font-bold text-white tracking-widest text-base block uppercase">71º BATALHÃO DE INFANTARIA MOTORIZADO</span>
-                <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase">Controle de Acervo • Sistema Militar</span>
+                <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase">Controle de Contratos Administrativos</span>
               </div>
             </div>
 
@@ -3067,13 +3067,13 @@ export default function App() {
       {/* Military Footer */}
       <footer className="bg-slate-900 border-t border-slate-800/80 py-4 pb-4 px-4 text-center text-xs font-mono text-slate-500 shrink-0 print:hidden shadow-inner space-y-1">
         <div>
-          71º BATALHÃO DE INFANTARIA MOTORIZADO &bull; Contratos e Licitações Offline
+          71º BATALHÃO DE INFANTARIA MOTORIZADO
+        </div>
+        <div className="text-[9px] text-slate-600">
+          Rodovia BR 423, Km 96, s/n - Heliópolis, Garanhuns - PE, 55296-630 &bull; Versão 1.5.0 (Local Host Client)
         </div>
         <div className="text-[10px] text-slate-500">
           Direitos Autorais Reservados &copy; 2026 71º BI Mtz &bull; Desenvolvido por 1º Sgt Gaudencio
-        </div>
-        <div className="text-[9px] text-slate-600">
-          BR-424, Garanhuns - PE &bull; Versão 1.5.0 (Local Host Client)
         </div>
       </footer>
 
