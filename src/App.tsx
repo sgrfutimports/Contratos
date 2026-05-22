@@ -284,6 +284,21 @@ export default function App() {
     }
   }, [currentUser]);
 
+  // Effect to hide scrollbar on body during login or transition screens
+  useEffect(() => {
+    if (!currentUser || isTransitioning) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+    };
+  }, [currentUser, isTransitioning]);
+
   // Administrador Security Session Timers: 3 min inactivity, 20 min max duration
   const [idleCountdown, setIdleCountdown] = useState<number>(180);
   const [sessionCountdown, setSessionCountdown] = useState<number>(1200);
@@ -1144,48 +1159,219 @@ export default function App() {
   }
 
   if (isTransitioning) {
+    const connectionActive = transitionProgress >= 25;
+    const databaseActive = transitionProgress >= 50;
+    const cryptographyActive = transitionProgress >= 75;
+    const integrityActive = transitionProgress >= 100;
+
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
-        <div className="absolute inset-0 bg-[radial-gradient(#1e3a1e_1px,transparent_1px)] [background-size:16px_16px] opacity-15 pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full filter blur-3xl pointer-events-none" />
+      <div className="h-screen w-screen overflow-hidden bg-slate-950 flex flex-col items-center justify-center p-4 relative font-sans select-none">
+        {/* Style injection for modern high-tech animations */}
+        <style>{`
+          @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(250%); }
+          }
+          @keyframes pulse-glow {
+            0%, 100% { opacity: 0.15; filter: blur(24px); }
+            50% { opacity: 0.35; filter: blur(16px); }
+          }
+          @keyframes rotation-ring {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes rotation-ring-reverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+          }
+          .animate-scanline {
+            animation: scanline 4s linear infinite;
+          }
+          .animate-pulse-glow {
+            animation: pulse-glow 3s ease-in-out infinite;
+          }
+          .animate-rotate-hud {
+            animation: rotation-ring 25s linear infinite;
+          }
+          .animate-rotate-hud-reverse {
+            animation: rotation-ring-reverse 15s linear infinite;
+          }
+        `}</style>
 
-        <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 backdrop-blur-md rounded-2xl p-8 shadow-2xl text-center space-y-6 z-10">
-          <div className="flex justify-center relative">
-            <div className="w-24 h-24 flex items-center justify-center p-2 animate-pulse">
-              <img src="/logo.png" alt="71º BI Mtz Logo" className="w-full h-full object-contain filter drop-shadow-md" />
-            </div>
-            <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-ping opacity-75" />
-          </div>
+        {/* Decorative military background patterns */}
+        <div className="absolute inset-0 bg-[radial-gradient(#1e3a1e_1px,transparent_1px)] [background-size:20px_20px] opacity-20 pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(16,185,129,0.03)_50%,transparent)] h-2/3 w-full animate-scanline pointer-events-none" />
+        
+        {/* Glowing backdrop light */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full animate-pulse-glow pointer-events-none" />
 
-          <div className="space-y-2">
-            <h3 className="text-white font-display font-medium text-lg tracking-wider uppercase">
-              Acesso Autorizado
-            </h3>
-            <p className="text-xs text-slate-400 font-mono">
-              71º BATALHÃO DE INFANTARIA MOTORIZADO
-            </p>
-          </div>
+        <div className="w-full max-w-lg bg-slate-900/80 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_-12px_rgba(16,185,129,0.25)] text-center space-y-6 z-10 relative">
+          
+          {/* Tactical HUD Corner Decorations */}
+          <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-emerald-500/40 rounded-tl" />
+          <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-emerald-500/40 rounded-tr" />
+          <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-emerald-500/40 rounded-bl" />
+          <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-emerald-500/40 rounded-br" />
 
-          <div className="space-y-3">
-            <div className="w-full bg-slate-950 border border-slate-800 rounded-full h-3 overflow-hidden p-0.5 shadow-inner">
-              <div 
-                className="bg-gradient-to-r from-emerald-600 to-emerald-450 h-full rounded-full transition-all duration-75 shadow-[0_0_8px_rgba(16,185,129,0.5)]" 
-                style={{ width: `${transitionProgress}%` }}
+          {/* Glowing Circular HUD Loader */}
+          <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
+            {/* SVG Progress Ring */}
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 120 120">
+              {/* Outer Track */}
+              <circle
+                cx="60"
+                cy="60"
+                r="53"
+                fill="none"
+                stroke="#1e293b"
+                strokeWidth="4"
+              />
+              {/* Animated Progress Ring */}
+              <circle
+                cx="60"
+                cy="60"
+                r="53"
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="4"
+                strokeDasharray={2 * Math.PI * 53}
+                strokeDashoffset={2 * Math.PI * 53 * (1 - transitionProgress / 100)}
+                strokeLinecap="round"
+                transform="rotate(-90 60 60)"
+                className="transition-all duration-100 ease-out"
+                style={{ filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.6))' }}
+              />
+              {/* Outer Dashed HUD Ring */}
+              <circle
+                cx="60"
+                cy="60"
+                r="57"
+                fill="none"
+                stroke="rgba(16, 185, 129, 0.25)"
+                strokeWidth="1.5"
+                strokeDasharray="6, 12"
+                className="animate-rotate-hud"
+              />
+              {/* Inner Dashed Accent Ring */}
+              <circle
+                cx="60"
+                cy="60"
+                r="47"
+                fill="none"
+                stroke="rgba(148, 163, 184, 0.2)"
+                strokeWidth="1"
+                strokeDasharray="20, 10"
+                className="animate-rotate-hud-reverse"
+              />
+            </svg>
+            
+            {/* Center Logo with Pulse effect */}
+            <div className="w-20 h-20 flex items-center justify-center p-2 z-10 bg-slate-950/40 rounded-full backdrop-blur-sm border border-slate-800">
+              <img 
+                src="/logo.png" 
+                alt="71º BI Mtz Logo" 
+                className="w-full h-full object-contain filter drop-shadow-md animate-pulse" 
               />
             </div>
-            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
-              <span className="text-emerald-400 animate-pulse">{transitionMessage}</span>
-              <span>{transitionProgress}%</span>
+            
+            {/* Progress Percentage floating badge */}
+            <div className="absolute -bottom-1.5 bg-emerald-950 border border-emerald-500/50 text-emerald-400 font-mono text-xs font-semibold px-2 py-0.5 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+              {transitionProgress}%
             </div>
           </div>
 
-          <div className="bg-slate-950/80 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-left text-slate-400 space-y-1 h-20 overflow-hidden select-none">
-            <div className="text-emerald-500/80">SESSÃO: {tempUser?.name.toUpperCase()}</div>
-            <div>STATUS: {tempUser?.role.toUpperCase()}</div>
-            {transitionProgress >= 25 && <div>[OK] Criptografia de canal local estabelecida.</div>}
-            {transitionProgress >= 50 && <div>[OK] Banco de dados SQLite carregado.</div>}
-            {transitionProgress >= 75 && <div>[OK] Chaves de auditoria validadas offline.</div>}
+          {/* System Identity */}
+          <div className="space-y-1">
+            <h3 className="text-white font-display font-medium text-lg tracking-widest uppercase">
+              Acesso Autorizado
+            </h3>
+            <p className="text-xs text-emerald-400 font-mono uppercase tracking-wider">
+              71º Batalhão de Infantaria Motorizado
+            </p>
+            <div className="text-[10px] text-slate-400 font-mono uppercase tracking-wide">
+              Sessão: <span className="text-white font-semibold">{tempUser?.name}</span> &bull; Nível: <span className="text-white font-semibold">{tempUser?.role.toUpperCase()}</span>
+            </div>
           </div>
+
+          {/* Checklist checkpoints */}
+          <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto text-left">
+            <div className={`p-2 rounded-lg border text-xs font-mono flex items-center gap-2 transition-all duration-300 ${
+              connectionActive 
+                ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-350' 
+                : 'bg-slate-950/20 border-slate-800 text-slate-500'
+            }`}>
+              <Shield className={`h-4 w-4 shrink-0 ${connectionActive ? 'text-emerald-400 animate-pulse' : 'text-slate-650'}`} />
+              <div className="truncate">
+                <span className="block text-[9px] uppercase tracking-wider text-slate-400">Canal Seguro</span>
+                <span className="font-semibold">{connectionActive ? 'VALIDADO' : 'AGUARDANDO'}</span>
+              </div>
+            </div>
+
+            <div className={`p-2 rounded-lg border text-xs font-mono flex items-center gap-2 transition-all duration-300 ${
+              databaseActive 
+                ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-350' 
+                : 'bg-slate-950/20 border-slate-800 text-slate-500'
+            }`}>
+              <Database className={`h-4 w-4 shrink-0 ${databaseActive ? 'text-emerald-400 animate-pulse' : 'text-slate-650'}`} />
+              <div className="truncate">
+                <span className="block text-[9px] uppercase tracking-wider text-slate-400">Banco SQLite</span>
+                <span className="font-semibold">{databaseActive ? 'CARREGADO' : 'AGUARDANDO'}</span>
+              </div>
+            </div>
+
+            <div className={`p-2 rounded-lg border text-xs font-mono flex items-center gap-2 transition-all duration-300 ${
+              cryptographyActive 
+                ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-350' 
+                : 'bg-slate-950/20 border-slate-800 text-slate-500'
+            }`}>
+              <Lock className={`h-4 w-4 shrink-0 ${cryptographyActive ? 'text-emerald-400 animate-pulse' : 'text-slate-650'}`} />
+              <div className="truncate">
+                <span className="block text-[9px] uppercase tracking-wider text-slate-400">Criptografia</span>
+                <span className="font-semibold">{cryptographyActive ? 'DECODIFICADA' : 'AGUARDANDO'}</span>
+              </div>
+            </div>
+
+            <div className={`p-2 rounded-lg border text-xs font-mono flex items-center gap-2 transition-all duration-300 ${
+              integrityActive 
+                ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-350' 
+                : 'bg-slate-950/20 border-slate-800 text-slate-500'
+            }`}>
+              <CheckCircle className={`h-4 w-4 shrink-0 ${integrityActive ? 'text-emerald-400 animate-pulse' : 'text-slate-650'}`} />
+              <div className="truncate">
+                <span className="block text-[9px] uppercase tracking-wider text-slate-400">Integridade</span>
+                <span className="font-semibold">{integrityActive ? 'VERIFICADA' : 'AGUARDANDO'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Micro terminal updates */}
+          <div className="space-y-1">
+            <div className="w-full bg-slate-950 border border-slate-850 rounded-lg p-3 text-[10px] font-mono text-left text-slate-400 h-24 overflow-hidden relative select-none">
+              {/* Dynamic flashing indicator */}
+              <div className="absolute top-1 right-2 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span className="text-[8px] text-slate-500 tracking-wider">OFFLINE MONITOR</span>
+              </div>
+
+              <div className="text-emerald-500/90 font-semibold mb-1 flex items-center justify-between border-b border-slate-900 pb-1">
+                <span>CONSOLA GESTÃO CONTRATOS</span>
+                <span className="text-slate-500 font-normal">v4.0.12</span>
+              </div>
+
+              <div className="space-y-0.5 overflow-y-auto h-14 pr-1">
+                <div className="text-slate-500">[0.0s] SYS: Inicializando rotinas de auditoria...</div>
+                {transitionProgress >= 15 && <div className="text-emerald-500/70">[0.3s] OK: Canal de autenticação local validado de forma autônoma.</div>}
+                {transitionProgress >= 40 && <div className="text-emerald-500/70">[0.6s] OK: Localizando tabelas contratos, fiscais e logs na memória.</div>}
+                {transitionProgress >= 60 && <div className="text-emerald-500/70">[0.9s] OK: Decodificação dos anexos do acervo militar concluída.</div>}
+                {transitionProgress >= 85 && <div className="text-emerald-500/70">[1.3s] OK: Assinatura sha256 offline confirmada com sucesso.</div>}
+                {transitionProgress >= 100 && <div className="text-emerald-400 font-semibold animate-pulse">[1.6s] OK: Liberando painel de controle administrativo.</div>}
+              </div>
+            </div>
+            <div className="text-center text-[10px] font-mono text-slate-500 italic animate-pulse">
+              {transitionMessage}
+            </div>
+          </div>
+
         </div>
       </div>
     );
