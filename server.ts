@@ -416,7 +416,7 @@ app.put('/api/contracts/:id', (req, res) => {
   db.prepare(`UPDATE contracts SET 
     number = ?, object = ?, contractorName = ?, cnpj = ?, value = ?, startDate = ?, endDate = ?, termMonths = ?, status = ?, fiscalTitularId = ?, fiscalSubstitutoId = ?, observations = ?
     WHERE id = ?`).run(
-    updates.number || current.number, updates.object || current.object, updates.contractorName || current.contractorName, updates.cnpj || current.cnpj, updates.value || current.value, updates.startDate || current.startDate, updates.endDate || current.endDate, updates.termMonths || current.termMonths, updates.status || current.status, updates.fiscalTitularId || current.fiscalTitularId, updates.fiscalSubstitutoId || current.fiscalSubstitutoId, updates.observations || current.observations, id
+    updates.number || current.number, updates.object || current.object, updates.contractorName || current.contractorName, updates.cnpj || current.cnpj, updates.value || current.value, updates.startDate || current.startDate, updates.endDate || current.endDate, updates.termMonths || current.termMonths, updates.status || current.status, updates.fiscalTitularId || current.fiscalTitularId, updates.fiscalSubstitutoId !== undefined ? updates.fiscalSubstitutoId : current.fiscalSubstitutoId, updates.observations !== undefined ? updates.observations : current.observations, id
   );
 
   if (_newHistoryAction) {

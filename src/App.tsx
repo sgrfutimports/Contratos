@@ -79,6 +79,8 @@ export default function App() {
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [editingObsIndex, setEditingObsIndex] = useState<number | null>(null);
+  const [editingObsText, setEditingObsText] = useState('');
   
   // Fiscal Form modal state
   const [isFiscalModalOpen, setIsFiscalModalOpen] = useState(false);
@@ -931,6 +933,103 @@ export default function App() {
     }
   };
 
+  const handleSaveEditObservation = async (index: number) => {
+    if (!selectedContract) return;
+    if (!editingObsText.trim()) {
+      showToast('A observação não pode estar vazia.', 'error');
+      return;
+    }
+
+    try {
+      const observationBlocks = selectedContract.observations
+        ? selectedContract.observations.split('\n\n').filter(block => block.trim() !== '')
+        : [];
+      
+      if (index < 0 || index >= observationBlocks.length) return;
+
+      const originalValue = observationBlocks[index];
+      observationBlocks[index] = editingObsText.trim();
+      const newObservations = observationBlocks.join('\n\n');
+
+      const payload = {
+        ...selectedContract,
+        auditorUser: currentUser?.name || 'Gestor de Contrato',
+        auditorRole: currentUser?.role || 'gestor',
+        observations: newObservations,
+        _newHistoryAction: {
+          action: 'Edição de Observação',
+          detail: `Observação editada: "${originalValue.substring(0, 30)}..." alterada para "${editingObsText.trim().substring(0, 30)}..."`
+        }
+      };
+
+      const response = await fetch(`/api/contracts/${selectedContract.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        showToast('Observação atualizada com sucesso.', 'success');
+        setEditingObsIndex(null);
+        setEditingObsText('');
+        const refreshed = await response.json();
+        setSelectedContract(refreshed);
+        await fetchAllData();
+      } else {
+        showToast('Erro ao salvar a observação modificada.', 'error');
+      }
+    } catch (e) {
+      showToast('Falha local ao salvar a observação modificada.', 'error');
+    }
+  };
+
+  const handleDeleteObservation = async (index: number) => {
+    if (!selectedContract) return;
+    if (!window.confirm('Tem certeza que deseja excluir esta observação/ocorrência?')) {
+      return;
+    }
+
+    try {
+      const observationBlocks = selectedContract.observations
+        ? selectedContract.observations.split('\n\n').filter(block => block.trim() !== '')
+        : [];
+      
+      if (index < 0 || index >= observationBlocks.length) return;
+
+      const deletedValue = observationBlocks[index];
+      observationBlocks.splice(index, 1);
+      const newObservations = observationBlocks.join('\n\n');
+
+      const payload = {
+        ...selectedContract,
+        auditorUser: currentUser?.name || 'Gestor de Contrato',
+        auditorRole: currentUser?.role || 'gestor',
+        observations: newObservations,
+        _newHistoryAction: {
+          action: 'Exclusão de Observação',
+          detail: `Observação excluída: "${deletedValue.substring(0, 60)}..."`
+        }
+      };
+
+      const response = await fetch(`/api/contracts/${selectedContract.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        showToast('Observação excluída com sucesso.', 'success');
+        const refreshed = await response.json();
+        setSelectedContract(refreshed);
+        await fetchAllData();
+      } else {
+        showToast('Erro ao excluir a observação.', 'error');
+      }
+    } catch (e) {
+      showToast('Falha local ao excluir a observação.', 'error');
+    }
+  };
+
   const handleGenerateBackup = async () => {
     try {
       const response = await fetch('/api/backups/generate', {
@@ -1687,11 +1786,84 @@ export default function App() {
                     </div>
 
                     {/* Observations */}
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <h4 className="text-xs text-slate-400 uppercase tracking-wider font-mono">Observações Administrativas Internas</h4>
-                      <div className="text-xs text-slate-300 font-sans whitespace-pre-line bg-slate-950 border border-slate-850 p-3 rounded-md min-h-[80px]">
-                        {selectedContract.observations || 'Nenhum detalhe administrativo foi inserido até o momento.'}
-                      </div>
+                      {(() => {
+                        const observationBlocks = selectedContract.observations
+                          ? selectedContract.observations.split('\n\n').filter(block => block.trim() !== '')
+                          : [];
+                        
+                        if (observationBlocks.length === 0) {
+                          return (
+                            <div className="text-xs text-slate-500 italic bg-slate-950 border border-slate-850 p-3 rounded-md min-h-[80px] flex items-center justify-center">
+                              Nenhum detalhe administrativo foi inserido até o momento.
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <div className="space-y-2">
+                            {observationBlocks.map((block, idx) => (
+                              <div key={idx} className="relative">
+                                {editingObsIndex === idx ? (
+                                  <div className="bg-slate-950 border border-slate-800 p-3 rounded-md space-y-2">
+                                    <textarea
+                                      value={editingObsText}
+                                      onChange={(e) => setEditingObsText(e.target.value)}
+                                      className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 min-h-[70px]"
+                                    />
+                                    <div className="flex justify-end gap-2">
+                                      <button
+                                        onClick={() => handleSaveEditObservation(idx)}
+                                        className="px-2 py-1 bg-emerald-800 hover:bg-emerald-700 text-white rounded text-[10px] uppercase font-semibold cursor-pointer"
+                                      >
+                                        Salvar
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setEditingObsIndex(null);
+                                          setEditingObsText('');
+                                        }}
+                                        className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[10px] uppercase font-semibold cursor-pointer"
+                                      >
+                                        Cancelar
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="bg-slate-950 border border-slate-850 hover:border-slate-700 p-3 rounded-md group transition-all relative">
+                                    <div className="text-xs text-slate-300 font-sans whitespace-pre-wrap pr-16 leading-relaxed">
+                                      {block}
+                                    </div>
+                                    
+                                    {(currentUser.role === 'admin' || currentUser.role === 'gestor') && (
+                                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-950 pl-2 rounded">
+                                        <button
+                                          onClick={() => {
+                                            setEditingObsIndex(idx);
+                                            setEditingObsText(block);
+                                          }}
+                                          title="Editar observação"
+                                          className="p-1 hover:bg-slate-800 text-sky-400 hover:text-sky-300 rounded cursor-pointer transition-colors"
+                                        >
+                                          <Edit className="h-3.5 w-3.5" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteObservation(idx)}
+                                          title="Excluir observação"
+                                          className="p-1 hover:bg-slate-800 text-red-400 hover:text-red-305 rounded cursor-pointer transition-colors"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 
