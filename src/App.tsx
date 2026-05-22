@@ -240,7 +240,7 @@ export default function App() {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 5;
+      progress += 1;
       setTransitionProgress(Math.min(progress, 100));
 
       if (progress < 25) {
@@ -272,7 +272,7 @@ export default function App() {
           showToast(`Bem-vindo, ${tempUser.name}! Nível operacional: ${tempUser.role.toUpperCase()}`, 'success');
         }, 200);
       }
-    }, 60);
+    }, 50);
 
     return () => clearInterval(interval);
   }, [isTransitioning, tempUser]);
@@ -1360,11 +1360,11 @@ export default function App() {
 
               <div className="space-y-0.5 overflow-y-auto h-14 pr-1">
                 <div className="text-slate-500">[0.0s] SYS: Inicializando rotinas de auditoria...</div>
-                {transitionProgress >= 15 && <div className="text-emerald-500/70">[0.3s] OK: Canal de autenticação local validado de forma autônoma.</div>}
-                {transitionProgress >= 40 && <div className="text-emerald-500/70">[0.6s] OK: Localizando tabelas contratos, fiscais e logs na memória.</div>}
-                {transitionProgress >= 60 && <div className="text-emerald-500/70">[0.9s] OK: Decodificação dos anexos do acervo militar concluída.</div>}
-                {transitionProgress >= 85 && <div className="text-emerald-500/70">[1.3s] OK: Assinatura sha256 offline confirmada com sucesso.</div>}
-                {transitionProgress >= 100 && <div className="text-emerald-400 font-semibold animate-pulse">[1.6s] OK: Liberando painel de controle administrativo.</div>}
+                {transitionProgress >= 15 && <div className="text-emerald-500/70">[0.8s] OK: Canal de autenticação local validado de forma autônoma.</div>}
+                {transitionProgress >= 40 && <div className="text-emerald-500/70">[2.0s] OK: Localizando tabelas contratos, fiscais e logs na memória.</div>}
+                {transitionProgress >= 60 && <div className="text-emerald-500/70">[3.0s] OK: Decodificação dos anexos do acervo militar concluída.</div>}
+                {transitionProgress >= 85 && <div className="text-emerald-500/70">[4.3s] OK: Assinatura sha256 offline confirmada com sucesso.</div>}
+                {transitionProgress >= 100 && <div className="text-emerald-400 font-semibold animate-pulse">[5.0s] OK: Liberando painel de controle administrativo.</div>}
               </div>
             </div>
             <div className="text-center text-[10px] font-mono text-slate-500 italic animate-pulse">
@@ -3065,12 +3065,15 @@ export default function App() {
 
 
       {/* Military Footer */}
-      <footer className="bg-slate-900 border-t border-slate-800/80 py-4 pb-4 px-4 text-center text-xs font-mono text-slate-500 shrink-0 print:hidden shadow-inner">
+      <footer className="bg-slate-900 border-t border-slate-800/80 py-4 pb-4 px-4 text-center text-xs font-mono text-slate-500 shrink-0 print:hidden shadow-inner space-y-1">
         <div>
-          71º BATALHÃO DE INFANTARIA MOTORIZADO - Contratos &bull; Plataforma Computacional Offline de Comando
+          71º BATALHÃO DE INFANTARIA MOTORIZADO &bull; Contratos e Licitações Offline
         </div>
-        <div className="text-[10px] text-slate-600 mt-1">
-          71º Batalhão de Infantaria Motorizado &bull; BR-424, Garanhuns - PE &bull; Versão 1.5 (Local Host Client)
+        <div className="text-[10px] text-slate-500">
+          Direitos Autorais Reservados &copy; 2026 71º BI Mtz &bull; Desenvolvido por 1º Sgt Gaudencio
+        </div>
+        <div className="text-[9px] text-slate-600">
+          BR-424, Garanhuns - PE &bull; Versão 1.5.0 (Local Host Client)
         </div>
       </footer>
 

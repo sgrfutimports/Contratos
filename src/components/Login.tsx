@@ -284,8 +284,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </div>
       </div>
       
-      <p className="mt-3 text-center text-[10px] sm:text-xs text-slate-500 font-mono">
-        71º BI Mtz &bull; Fiscalização Administrativa Gestão de Contratos
+      <p className="mt-3 text-center text-[10px] sm:text-xs text-slate-500 font-mono leading-relaxed">
+        Direitos Autorais Reservados &copy; 2026 71º BI Mtz &bull; Desenvolvido por 1º Sgt Gaudencio
       </p>
     </div>
   );

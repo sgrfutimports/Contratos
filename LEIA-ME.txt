@@ -1,0 +1,73 @@
+======================================================================
+                  71º BATALHÃO DE INFANTARIA MOTORIZADO
+       Sistema de Fiscalização Administrativa e Gestão de Contratos
+======================================================================
+
+Este guia descreve os pré-requisitos e o passo a passo detalhado para
+colocar a aplicação em execução em seu ambiente local.
+
+----------------------------------------------------------------------
+1. PRÉ-REQUISITOS
+----------------------------------------------------------------------
+
+Antes de iniciar, certifique-se de possuir o seguinte pré-requisito 
+instalado em seu computador:
+
+* Node.js (Versão 18.x ou superior recomendada)
+  - Baixe e instale gratuitamente pelo site oficial: https://nodejs.org
+
+----------------------------------------------------------------------
+2. COMO INICIALIZAR A APLICAÇÃO
+----------------------------------------------------------------------
+
+Você pode optar pela inicialização automática simplificada ou pelo 
+processo manual via Prompt de Comando.
+
+MÉTODO 1: Inicialização Automática (Mais Fácil)
+-----------------------------------------------
+Existe um arquivo configurado para realizar todos os comandos de 
+instalação e inicialização automaticamente.
+
+1. Navegue até a pasta do projeto.
+2. Dê um duplo clique no arquivo "iniciar.bat".
+3. O script fará o seguinte de forma automatizada:
+   - Instalará as dependências de pacotes necessárias (npm install).
+   - Abrirá o navegador de internet no endereço: http://localhost:5000
+   - Inicializará o servidor local em segundo plano.
+4. IMPORTANTE: Mantenha a janela preta do Prompt de Comando aberta 
+   enquanto utilizar o sistema. Para desligar o servidor, basta 
+   fechar essa janela.
+
+MÉTODO 2: Inicialização Manual (Via Prompt de Comando / PowerShell)
+-------------------------------------------------------------------
+Caso queira controlar o processo manualmente:
+
+1. Abra o Prompt de Comando (CMD) na pasta raiz do projeto:
+   c:\Users\RICARDO\Downloads\contratos
+2. Instale as dependências executando o comando:
+   npm install
+3. Inicie o servidor local com o comando:
+   npm run dev
+4. Acesse o sistema abrindo o navegador de internet e digitando:
+   http://localhost:5000
+
+----------------------------------------------------------------------
+3. CREDENCIAIS ADMINISTRATIVAS DE ACESSO
+----------------------------------------------------------------------
+
+Para acessar o painel e testar todas as funcionalidades do sistema:
+
+* Usuário: admin
+* Senha:  admin123
+
+----------------------------------------------------------------------
+4. DESENVOLVIMENTO E DIREITOS AUTORAIS
+----------------------------------------------------------------------
+
+Este painel foi desenvolvido especificamente para fins de otimização
+da fiscalização administrativa de contratos sob custódia da gestão 
+interna do 71º Batalhão de Infantaria Motorizado.
+
+* Desenvolvido por: 1º Sgt Gaudencio
+* Direitos Reservados: Copyright (C) 2026 71º BI Mtz
+======================================================================
