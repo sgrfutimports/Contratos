@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Theme overrides using dynamic css variables set by JS */
+  --color-emerald-350: var(--theme-350, #34d399);
+  --color-emerald-400: var(--theme-400, #34d399);
+  --color-emerald-450: var(--theme-450, #10b981);
+  --color-emerald-500: var(--theme-500, #10b981);
+  --color-emerald-600: var(--theme-600, #059669);
+  --color-emerald-700: var(--theme-700, #047857);
+  --color-emerald-800: var(--theme-800, #065f46);
+  --color-emerald-900: var(--theme-900, #064e3b);
+  --color-emerald-950: var(--theme-950, #022c22);
+}
