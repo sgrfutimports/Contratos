@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Shield, Key, User as UserIcon, RefreshCw, AlertTriangle, Info } from 'lucide-react';
+import { Shield, Key, User as UserIcon, RefreshCw, AlertTriangle, Info, Eye, EyeOff } from 'lucide-react';
 import { User } from '../types';
 
 interface LoginProps {
@@ -23,6 +23,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [recoverCpf, setRecoverCpf] = useState('');
   const [recoverSuccess, setRecoverSuccess] = useState('');
   const [recoverError, setRecoverError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +86,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden" id="login-container">
+    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-4 sm:py-6 sm:px-6 lg:px-8 relative overflow-hidden" id="login-container">
       {/* Decorative military background patterns */}
       <div className="absolute inset-0 bg-[radial-gradient(#1e3a1e_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
       <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-950/20 rounded-full filter blur-3xl pointer-events-none" />
@@ -110,8 +111,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4">
-        <div className="bg-slate-800/90 border border-slate-700/80 backdrop-blur-md py-8 px-6 shadow-2xl rounded-xl sm:px-10" id="login-card">
+      <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4">
+        <div className="bg-slate-800/90 border border-slate-700/80 backdrop-blur-md py-6 px-6 shadow-2xl rounded-xl sm:px-10" id="login-card">
           {!showRecover ? (
             <form onSubmit={handleSubmit} className="space-y-6">
               <h3 className="text-lg font-medium font-display text-white border-b border-slate-700 pb-3 flex items-center gap-2">
@@ -158,13 +159,21 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   <input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Senha do quartel"
-                    className="block w-full pl-10 pr-3 py-2.5 border border-slate-700 bg-slate-900 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-sans transition-all"
+                    className="block w-full pl-10 pr-10 py-2.5 border border-slate-700 bg-slate-900 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-sans transition-all"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors focus:outline-none cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
               </div>
 
@@ -277,7 +286,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </div>
       </div>
       
-      <p className="mt-8 text-center text-xs text-slate-500 font-mono">
+      <p className="mt-4 text-center text-xs text-slate-500 font-mono">
         71º BI Mtz &bull; Fiscalização Administrativa Gestão de Contratos
       </p>
     </div>

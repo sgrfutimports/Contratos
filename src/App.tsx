@@ -64,6 +64,12 @@ export default function App() {
   // Feedback notifications
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
+  // Transition and Loading Animation States
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [tempUser, setTempUser] = useState<User | null>(null);
+  const [transitionProgress, setTransitionProgress] = useState(0);
+  const [transitionMessage, setTransitionMessage] = useState('');
+
   // Contracts Search & Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -227,6 +233,49 @@ export default function App() {
     }
     setLoading(false);
   }, []);
+
+  // Effect to simulate security database decryption and loading upon login success
+  useEffect(() => {
+    if (!isTransitioning || !tempUser) return;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 5;
+      setTransitionProgress(Math.min(progress, 100));
+
+      if (progress < 25) {
+        setTransitionMessage('Autenticando credenciais criptografadas...');
+      } else if (progress < 50) {
+        setTransitionMessage('Carregando registros do banco SQLite local...');
+      } else if (progress < 75) {
+        setTransitionMessage('Decodificando anexos e contratos administrativos...');
+      } else if (progress < 95) {
+        setTransitionMessage('Verificando chaves de integridade offline...');
+      } else {
+        setTransitionMessage('Acesso concedido. Inicializando painel...');
+      }
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          setCurrentUser(tempUser);
+          setIsTransitioning(false);
+          setTempUser(null);
+          
+          setActiveTab('dashboard');
+          localStorage.setItem('71bi_session_user', JSON.stringify(tempUser));
+          if (tempUser.role === 'admin') {
+            localStorage.setItem('71bi_session_login_time', Date.now().toString());
+          } else {
+            localStorage.removeItem('71bi_session_login_time');
+          }
+          showToast(`Bem-vindo, ${tempUser.name}! Nível operacional: ${tempUser.role.toUpperCase()}`, 'success');
+        }, 200);
+      }
+    }, 60);
+
+    return () => clearInterval(interval);
+  }, [isTransitioning, tempUser]);
 
   // Fetch all database records when user state is unlocked
   useEffect(() => {
@@ -422,15 +471,10 @@ export default function App() {
   };
 
   const handleLoginSuccess = (user: User) => {
-    setCurrentUser(user);
-    setActiveTab('dashboard');
-    localStorage.setItem('71bi_session_user', JSON.stringify(user));
-    if (user.role === 'admin') {
-      localStorage.setItem('71bi_session_login_time', Date.now().toString());
-    } else {
-      localStorage.removeItem('71bi_session_login_time');
-    }
-    showToast(`Bem-vindo, ${user.name}! Nível operacional: ${user.role.toUpperCase()}`, 'success');
+    setTempUser(user);
+    setIsTransitioning(true);
+    setTransitionProgress(0);
+    setTransitionMessage('Autenticando credenciais criptografadas...');
   };
 
   const handleLogout = async () => {
@@ -1099,12 +1143,56 @@ export default function App() {
     );
   }
 
+  if (isTransitioning) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+        <div className="absolute inset-0 bg-[radial-gradient(#1e3a1e_1px,transparent_1px)] [background-size:16px_16px] opacity-15 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full filter blur-3xl pointer-events-none" />
+
+        <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 backdrop-blur-md rounded-2xl p-8 shadow-2xl text-center space-y-6 z-10">
+          <div className="flex justify-center relative">
+            <div className="w-24 h-24 flex items-center justify-center p-2 animate-pulse">
+              <img src="/logo.png" alt="71º BI Mtz Logo" className="w-full h-full object-contain filter drop-shadow-md" />
+            </div>
+            <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-ping opacity-75" />
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-white font-display font-medium text-lg tracking-wider uppercase">
+              Acesso Autorizado
+            </h3>
+            <p className="text-xs text-slate-400 font-mono">
+              71º BATALHÃO DE INFANTARIA MOTORIZADO
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="w-full bg-slate-950 border border-slate-800 rounded-full h-3 overflow-hidden p-0.5 shadow-inner">
+              <div 
+                className="bg-gradient-to-r from-emerald-600 to-emerald-450 h-full rounded-full transition-all duration-75 shadow-[0_0_8px_rgba(16,185,129,0.5)]" 
+                style={{ width: `${transitionProgress}%` }}
+              />
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+              <span className="text-emerald-400 animate-pulse">{transitionMessage}</span>
+              <span>{transitionProgress}%</span>
+            </div>
+          </div>
+
+          <div className="bg-slate-950/80 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-left text-slate-400 space-y-1 h-20 overflow-hidden select-none">
+            <div className="text-emerald-500/80">SESSÃO: {tempUser?.name.toUpperCase()}</div>
+            <div>STATUS: {tempUser?.role.toUpperCase()}</div>
+            {transitionProgress >= 25 && <div>[OK] Criptografia de canal local estabelecida.</div>}
+            {transitionProgress >= 50 && <div>[OK] Banco de dados SQLite carregado.</div>}
+            {transitionProgress >= 75 && <div>[OK] Chaves de auditoria validadas offline.</div>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentUser) {
-    return <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-950">
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518534237152-78eaebcd4574?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-5 filter grayscale mix-blend-overlay"></div>
-      
-      <Login onLoginSuccess={handleLoginSuccess} />
-    </div>;
+    return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
