@@ -1,0 +1,164 @@
+{
+  "users": [
+    {
+      "id": "user_admin",
+      "username": "gaudencio",
+      "name": "SIDICLEI GAUDENCIO RICARDO",
+      "role": "admin",
+      "password": "$2b$10$87nvbVLldCrPAdQzNrIiiu4gFBEYHutN2QTlLTZeMX/cIgrMpeC76",
+      "active": 1,
+      "cpf": "04649321492",
+      "precCp": "125054549",
+      "email": "sidiclei.gaudencio@eb.mil.br",
+      "phone": "(87) 99940-2628",
+      "identity": "040014985-2",
+      "warName": "GAUDENCIO",
+      "rank": "1º Sargento"
+    },
+    {
+      "id": "user_f_1779465840692",
+      "username": "gaudencio1",
+      "name": "1º Sgt gaudencio",
+      "role": "fiscal",
+      "password": "$2b$10$i12eP/Hj9dfIHrUhp4fO5eMv6nDhjXPe0uSb5GaTZ4YcQFM5D7Wl6",
+      "active": 1,
+      "cpf": "046.493.214-92",
+      "precCp": null,
+      "email": "sidiclei.gaudencio@eb.mil.br",
+      "phone": "(87) 99940-2628",
+      "identity": null,
+      "warName": "gaudencio",
+      "rank": "1º Sgt"
+    },
+    {
+      "id": "user_f_1779466076522",
+      "username": "joão vitor",
+      "name": "3º Sgt JOÃO VITOR",
+      "role": "fiscal",
+      "password": "$2b$10$1IsPFBIreQDwkHFCLpU1uuGkoUMDk9OedKOnuLgI.LCKOsOY5zdS2",
+      "active": 1,
+      "cpf": "130.552.294-01",
+      "precCp": null,
+      "email": "joaovitor@eb.mil.br",
+      "phone": "(87) 99933-4728",
+      "identity": null,
+      "warName": "JOÃO VITOR",
+      "rank": "3º Sgt"
+    }
+  ],
+  "fiscais": [
+    {
+      "id": "f_1779465840692",
+      "name": "SIDICLEI GAUDENCIO RICARDO",
+      "postoGraduacao": "1º Sgt",
+      "cpf": "046.493.214-92",
+      "email": "sidiclei.gaudencio@eb.mil.br",
+      "phone": "(87) 99940-2628",
+      "role": "titular",
+      "status": "ativo",
+      "warName": "gaudencio"
+    },
+    {
+      "id": "f_1779466076522",
+      "name": "JOÃO VITOR DE ARAUJO RICARDO",
+      "postoGraduacao": "3º Sgt",
+      "cpf": "130.552.294-01",
+      "email": "joaovitor@eb.mil.br",
+      "phone": "(87) 99933-4728",
+      "role": "substituto",
+      "status": "ativo",
+      "warName": "JOÃO VITOR"
+    }
+  ],
+  "contracts": [
+    {
+      "id": "c_1779465679543",
+      "number": "00002/2021",
+      "object": "SERVIÇOS DE TELEFONIA MÓVEL PESSOAL (SMP- SERVIÇO MÓVEL PESSOAL), INTERNET 4G/3G, LOCAL E LONGA DISTÂNCIA NACIONAL - LDN, NA MODALIDADE PLANO CORPORATIVO, HABILITADOS NO PLANO PÓS-PAGO, COM TARIFAS INTRA - GRUPO ZERO NACIONAL COM FORNECIMENTO DE SIM - CARDS, PARA ATENDER ÀS NECESSIDADES DA OPERAÇÃO CARRO-PIPA DO 71° BATALHÃO DE INFANTARIA MOTORIZADO",
+      "contractorName": "TELEFONICA BRASIL S.A",
+      "cnpj": "02.558.157/0001-62",
+      "value": 1098,
+      "startDate": "2021-05-19",
+      "endDate": "2026-05-28",
+      "termMonths": 12,
+      "status": "em_vencimento",
+      "fiscalTitularId": "f_1779465840692",
+      "fiscalSubstitutoId": "f_1779466076522",
+      "observations": ""
+    },
+    {
+      "id": "c_1779474285988",
+      "number": "00213/2023",
+      "object": "Prestação de serviço de Saúde Autônomo Conveniado - FUSEx\n",
+      "contractorName": "MARCIA CRISTINA FERREIRA SILVA",
+      "cnpj": "058.710.614-00",
+      "value": 40000,
+      "startDate": "2023-03-01",
+      "endDate": "2026-12-31",
+      "termMonths": 12,
+      "status": "ativo",
+      "fiscalTitularId": "",
+      "fiscalSubstitutoId": "",
+      "observations": ""
+    },
+    {
+      "id": "c_1779474350212",
+      "number": "00003/2024",
+      "object": "Fornecimento de Energia Elétrica\n",
+      "contractorName": "COMPANHIA ENERGETICA DE PERNAMBUCO",
+      "cnpj": "10.835.932/0001-08",
+      "value": 600000,
+      "startDate": "2024-05-18",
+      "endDate": "2029-05-17",
+      "termMonths": 12,
+      "status": "ativo",
+      "fiscalTitularId": "",
+      "fiscalSubstitutoId": "",
+      "observations": ""
+    },
+    {
+      "id": "c_1779474447167",
+      "number": "00013/2025",
+      "object": "Prestação de Serviço",
+      "contractorName": "AUTO SUTURE DO BRASIL LTDA",
+      "cnpj": "01.645.409/0003-90",
+      "value": 71315,
+      "startDate": "2025-07-31",
+      "endDate": "2026-07-30",
+      "termMonths": 12,
+      "status": "ativo",
+      "fiscalTitularId": "",
+      "fiscalSubstitutoId": "",
+      "observations": ""
+    },
+    {
+      "id": "c_1779475563136",
+      "number": "00014/2025",
+      "object": "Fornecimento de Energia Elétrica\n",
+      "contractorName": "CEMIG GERACAO E TRANSMISSAO S",
+      "cnpj": "06.981.176/0001-58",
+      "value": 513285.18,
+      "startDate": "2026-01-01",
+      "endDate": "2030-12-31",
+      "termMonths": 12,
+      "status": "ativo",
+      "fiscalTitularId": "",
+      "fiscalSubstitutoId": "",
+      "observations": ""
+    }
+  ],
+  "settings": [
+    {
+      "key": "unit_name",
+      "value": "71º BI Mtz"
+    },
+    {
+      "key": "alert_days",
+      "value": "90"
+    },
+    {
+      "key": "theme",
+      "value": "emerald"
+    }
+  ]
+}

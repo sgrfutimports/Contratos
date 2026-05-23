@@ -36,109 +36,249 @@ const DB_FILE = path.join(DB_DIR, 'db.sqlite');
   }
 });
 
-const db = new Database(DB_FILE);
+let db = new Database(DB_FILE);
 db.pragma('journal_mode = WAL');
 
-// Initialize database schema
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id TEXT PRIMARY KEY,
-    username TEXT UNIQUE,
-    name TEXT,
-    role TEXT,
-    password TEXT,
-    active INTEGER,
-    cpf TEXT,
-    precCp TEXT,
-    email TEXT,
-    phone TEXT,
-    identity TEXT,
-    warName TEXT,
-    rank TEXT
-  );
+function createSchema() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT UNIQUE,
+      name TEXT,
+      role TEXT,
+      password TEXT,
+      active INTEGER,
+      cpf TEXT,
+      precCp TEXT,
+      email TEXT,
+      phone TEXT,
+      identity TEXT,
+      warName TEXT,
+      rank TEXT
+    );
 
-  CREATE TABLE IF NOT EXISTS fiscais (
-    id TEXT PRIMARY KEY,
-    name TEXT,
-    postoGraduacao TEXT,
-    cpf TEXT,
-    email TEXT,
-    phone TEXT,
-    role TEXT,
-    status TEXT
-  );
+    CREATE TABLE IF NOT EXISTS fiscais (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      postoGraduacao TEXT,
+      cpf TEXT,
+      email TEXT,
+      phone TEXT,
+      role TEXT,
+      status TEXT,
+      warName TEXT
+    );
 
-  CREATE TABLE IF NOT EXISTS contracts (
-    id TEXT PRIMARY KEY,
-    number TEXT,
-    object TEXT,
-    contractorName TEXT,
-    cnpj TEXT,
-    value REAL,
-    startDate TEXT,
-    endDate TEXT,
-    termMonths INTEGER,
-    status TEXT,
-    fiscalTitularId TEXT,
-    fiscalSubstitutoId TEXT,
-    observations TEXT
-  );
+    CREATE TABLE IF NOT EXISTS contracts (
+      id TEXT PRIMARY KEY,
+      number TEXT,
+      object TEXT,
+      contractorName TEXT,
+      cnpj TEXT,
+      value REAL,
+      startDate TEXT,
+      endDate TEXT,
+      termMonths INTEGER,
+      status TEXT,
+      fiscalTitularId TEXT,
+      fiscalSubstitutoId TEXT,
+      observations TEXT
+    );
 
-  CREATE TABLE IF NOT EXISTS contract_documents (
-    id TEXT PRIMARY KEY,
-    contractId TEXT,
-    name TEXT,
-    filename TEXT,
-    uploadDate TEXT,
-    size TEXT,
-    FOREIGN KEY(contractId) REFERENCES contracts(id) ON DELETE CASCADE
-  );
+    CREATE TABLE IF NOT EXISTS contract_documents (
+      id TEXT PRIMARY KEY,
+      contractId TEXT,
+      name TEXT,
+      filename TEXT,
+      uploadDate TEXT,
+      size TEXT,
+      FOREIGN KEY(contractId) REFERENCES contracts(id) ON DELETE CASCADE
+    );
 
-  CREATE TABLE IF NOT EXISTS contract_history (
-    id TEXT PRIMARY KEY,
-    contractId TEXT,
-    date TEXT,
-    user TEXT,
-    action TEXT,
-    detail TEXT,
-    FOREIGN KEY(contractId) REFERENCES contracts(id) ON DELETE CASCADE
-  );
+    CREATE TABLE IF NOT EXISTS contract_history (
+      id TEXT PRIMARY KEY,
+      contractId TEXT,
+      date TEXT,
+      user TEXT,
+      action TEXT,
+      detail TEXT,
+      FOREIGN KEY(contractId) REFERENCES contracts(id) ON DELETE CASCADE
+    );
 
-  CREATE TABLE IF NOT EXISTS notifications (
-    id TEXT PRIMARY KEY,
-    type TEXT,
-    message TEXT,
-    date TEXT,
-    contractId TEXT,
-    isRead INTEGER
-  );
+    CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      type TEXT,
+      message TEXT,
+      date TEXT,
+      contractId TEXT,
+      isRead INTEGER
+    );
 
-  CREATE TABLE IF NOT EXISTS logs (
-    id TEXT PRIMARY KEY,
-    date TEXT,
-    user TEXT,
-    role TEXT,
-    action TEXT,
-    detail TEXT
-  );
-
-
-`);
+    CREATE TABLE IF NOT EXISTS logs (
+      id TEXT PRIMARY KEY,
+      date TEXT,
+      user TEXT,
+      role TEXT,
+      action TEXT,
+      detail TEXT
+    );
+  `);
+}
 
 function addLog(user: string, role: string, action: string, detail: string) {
   const stmt = db.prepare('INSERT INTO logs (id, date, user, role, action, detail) VALUES (?, ?, ?, ?, ?, ?)');
   stmt.run(`log_${Date.now()}_${Math.floor(Math.random()*1000)}`, new Date().toISOString().replace('T', ' ').substring(0, 19), user, role, action, detail);
 }
 
-// Seed admin user if db is empty
-const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
-if (userCount.count === 0) {
-  const hash = bcrypt.hashSync('admin123', 10);
-  db.prepare('INSERT INTO users (id, username, name, role, password, active, cpf) VALUES (?, ?, ?, ?, ?, ?, ?)').run(
-    'user_admin', 'admin', 'Administrador Geral', 'admin', hash, 1, '000.000.000-00'
-  );
-  addLog('Sistema', 'admin', 'INICIALIZACAO', 'Banco SQLite inicializado e usuário admin criado.');
+function seedDatabase() {
+  const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+  if (userCount.count === 0) {
+    // 1. Seed default admin user
+    const hash = bcrypt.hashSync('admin123', 10);
+    db.prepare('INSERT INTO users (id, username, name, role, password, active, cpf) VALUES (?, ?, ?, ?, ?, ?, ?)').run(
+      'user_admin', 'admin', 'Administrador Geral', 'admin', hash, 1, '000.000.000-00'
+    );
+
+    // 2. Seed gaudencio admin user
+    db.prepare('INSERT INTO users (id, username, name, role, password, active, cpf, precCp, email, phone, identity, warName, rank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(
+        'user_admin_gaudencio', 'gaudencio', 'SIDICLEI GAUDENCIO RICARDO', 'admin',
+        '$2b$10$87nvbVLldCrPAdQzNrIiiu4gFBEYHutN2QTlLTZeMX/cIgrMpeC76', 1, '04649321492', '125054549',
+        'sidiclei.gaudencio@eb.mil.br', '(87) 99940-2628', '040014985-2', 'GAUDENCIO', '1º Sargento'
+      );
+
+    // 3. Seed fiscais
+    const fiscaisData = [
+      {
+        id: 'f_1779465840692',
+        name: 'SIDICLEI GAUDENCIO RICARDO',
+        postoGraduacao: '1º Sgt',
+        cpf: '046.493.214-92',
+        email: 'sidiclei.gaudencio@eb.mil.br',
+        phone: '(87) 99940-2628',
+        role: 'titular',
+        status: 'ativo',
+        warName: 'gaudencio',
+        username: 'gaudencio1',
+        passwordHash: '$2b$10$i12eP/Hj9dfIHrUhp4fO5eMv6nDhjXPe0uSb5GaTZ4YcQFM5D7Wl6'
+      },
+      {
+        id: 'f_1779466076522',
+        name: 'JOÃO VITOR DE ARAUJO RICARDO',
+        postoGraduacao: '3º Sgt',
+        cpf: '130.552.294-01',
+        email: 'joaovitor@eb.mil.br',
+        phone: '(87) 99933-4728',
+        role: 'substituto',
+        status: 'ativo',
+        warName: 'JOÃO VITOR',
+        username: 'joão vitor',
+        passwordHash: '$2b$10$1IsPFBIreQDwkHFCLpU1uuGkoUMDk9OedKOnuLgI.LCKOsOY5zdS2'
+      }
+    ];
+
+    for (const f of fiscaisData) {
+      db.prepare('INSERT INTO fiscais (id, name, postoGraduacao, cpf, email, phone, role, status, warName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(f.id, f.name, f.postoGraduacao, f.cpf, f.email, f.phone, f.role, f.status, f.warName);
+
+      db.prepare('INSERT INTO users (id, username, name, role, password, active, cpf, email, phone, warName, rank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(`user_${f.id}`, f.username, `${f.postoGraduacao} ${f.warName}`, 'fiscal', f.passwordHash, 1, f.cpf, f.email, f.phone, f.warName, f.postoGraduacao);
+    }
+
+    // 4. Seed contracts
+    const contractsData = [
+      {
+        id: "c_1779465679543",
+        number: "00002/2021",
+        object: "SERVIÇOS DE TELEFONIA MÓVEL PESSOAL (SMP- SERVIÇO MÓVEL PESSOAL), INTERNET 4G/3G, LOCAL E LONGA DISTÂNCIA NACIONAL - LDN, NA MODALIDADE PLANO CORPORATIVO, HABILITADOS NO PLANO PÓS-PAGO, COM TARIFAS INTRA - GRUPO ZERO NACIONAL COM FORNECIMENTO DE SIM - CARDS, PARA ATENDER ÀS NECESSIDADES DA OPERAÇÃO CARRO-PIPA DO 71° BATALHÃO DE INFANTARIA MOTORIZADO",
+        contractorName: "TELEFONICA BRASIL S.A",
+        cnpj: "02.558.157/0001-62",
+        value: 1098,
+        startDate: "2021-05-19",
+        endDate: "2026-05-28",
+        termMonths: 12,
+        status: "em_vencimento",
+        fiscalTitularId: "f_1779465840692",
+        fiscalSubstitutoId: "f_1779466076522",
+        observations: ""
+      },
+      {
+        id: "c_1779474285988",
+        number: "00213/2023",
+        object: "Prestação de serviço de Saúde Autônomo Conveniado - FUSEx\n",
+        contractorName: "MARCIA CRISTINA FERREIRA SILVA",
+        cnpj: "058.710.614-00",
+        value: 40000,
+        startDate: "2023-03-01",
+        endDate: "2026-12-31",
+        termMonths: 12,
+        status: "ativo",
+        fiscalTitularId: "",
+        fiscalSubstitutoId: "",
+        observations: ""
+      },
+      {
+        id: "c_1779474350212",
+        number: "00003/2024",
+        object: "Fornecimento de Energia Elétrica\n",
+        contractorName: "COMPANHIA ENERGETICA DE PERNAMBUCO",
+        cnpj: "10.835.932/0001-08",
+        value: 600000,
+        startDate: "2024-05-18",
+        endDate: "2029-05-17",
+        termMonths: 12,
+        status: "ativo",
+        fiscalTitularId: "",
+        fiscalSubstitutoId: "",
+        observations: ""
+      },
+      {
+        id: "c_1779474447167",
+        number: "00013/2025",
+        object: "Prestação de Serviço",
+        contractorName: "AUTO SUTURE DO BRASIL LTDA",
+        cnpj: "01.645.409/0003-90",
+        value: 71315,
+        startDate: "2025-07-31",
+        endDate: "2026-07-30",
+        termMonths: 12,
+        status: "ativo",
+        fiscalTitularId: "",
+        fiscalSubstitutoId: "",
+        observations: ""
+      },
+      {
+        id: "c_1779475563136",
+        number: "00014/2025",
+        object: "Fornecimento de Energia Elétrica\n",
+        contractorName: "CEMIG GERACAO E TRANSMISSAO S",
+        cnpj: "06.981.176/0001-58",
+        value: 513285.18,
+        startDate: "2026-01-01",
+        endDate: "2030-12-31",
+        termMonths: 12,
+        status: "ativo",
+        fiscalTitularId: "",
+        fiscalSubstitutoId: "",
+        observations: ""
+      }
+    ];
+
+    for (const c of contractsData) {
+      db.prepare('INSERT INTO contracts (id, number, object, contractorName, cnpj, value, startDate, endDate, termMonths, status, fiscalTitularId, fiscalSubstitutoId, observations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(c.id, c.number, c.object, c.contractorName, c.cnpj, c.value, c.startDate, c.endDate, c.termMonths, c.status, c.fiscalTitularId, c.fiscalSubstitutoId, c.observations);
+
+      db.prepare('INSERT INTO contract_history (id, contractId, date, user, action, detail) VALUES (?, ?, ?, ?, ?, ?)')
+        .run(`h_seed_${Date.now()}_${Math.floor(Math.random()*1000)}`, c.id, new Date().toISOString().replace('T', ' ').substring(0, 19), 'Sistema', 'Cadastro', 'Contrato cadastrado administrativamente no acervo inicial de semeadura.');
+    }
+
+    addLog('Sistema', 'admin', 'INICIALIZACAO', 'Banco SQLite inicializado e acervo de semeadura restabelecido.');
+  }
 }
+
+// Initialize on startup
+createSchema();
+seedDatabase();
 
 
 
@@ -598,10 +738,86 @@ app.post('/api/backups/generate', (req, res) => {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `backup_contratos_${timestamp}.sqlite`;
   try {
+    // Flush WAL changes to main db file before copying
+    db.pragma('wal_checkpoint(TRUNCATE)');
     fs.copyFileSync(DB_FILE, path.join(BACKUPS_DIR, filename));
     res.json({ success: true, message: 'Backup SQLite gerado com sucesso' });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao gerar backup SQLite' });
+  }
+});
+
+app.post('/api/backups/restore', (req, res) => {
+  const { filename, auditorUser, auditorRole } = req.body;
+  if (!filename) {
+    return res.status(400).json({ error: 'Nome do arquivo de backup não fornecido.' });
+  }
+
+  const backupPath = path.join(BACKUPS_DIR, filename);
+  if (!fs.existsSync(backupPath)) {
+    return res.status(404).json({ error: 'Arquivo de backup não encontrado.' });
+  }
+
+  try {
+    // 1. Force checkpoint and close database
+    db.pragma('wal_checkpoint(TRUNCATE)');
+    db.close();
+
+    // 2. Remove main database and WAL files
+    const shmFile = `${DB_FILE}-shm`;
+    const walFile = `${DB_FILE}-wal`;
+    if (fs.existsSync(DB_FILE)) fs.unlinkSync(DB_FILE);
+    if (fs.existsSync(shmFile)) fs.unlinkSync(shmFile);
+    if (fs.existsSync(walFile)) fs.unlinkSync(walFile);
+
+    // 3. Copy the backup in place
+    fs.copyFileSync(backupPath, DB_FILE);
+
+    // 4. Reopen connection
+    db = new Database(DB_FILE);
+    db.pragma('journal_mode = WAL');
+
+    // 5. Add audit log entry
+    addLog(auditorUser || 'admin', auditorRole || 'admin', 'RESTAURACAO_BACKUP', `Backup restaurado do arquivo: ${filename}`);
+
+    res.json({ success: true, message: `Backup "${filename}" restaurado com sucesso no sistema local.` });
+  } catch (err: any) {
+    console.error('Error during backup restoration:', err);
+    try {
+      db = new Database(DB_FILE);
+      db.pragma('journal_mode = WAL');
+    } catch (_) {}
+    res.status(500).json({ error: 'Erro ao restaurar backup: ' + err.message });
+  }
+});
+
+app.post('/api/admin/reset-database', (req, res) => {
+  const { auditorUser, auditorRole } = req.body;
+  try {
+    // 1. Drop existing tables
+    db.exec(`
+      DROP TABLE IF EXISTS contract_documents;
+      DROP TABLE IF EXISTS contract_history;
+      DROP TABLE IF EXISTS contracts;
+      DROP TABLE IF EXISTS fiscais;
+      DROP TABLE IF EXISTS users;
+      DROP TABLE IF EXISTS notifications;
+      DROP TABLE IF EXISTS logs;
+    `);
+
+    // 2. Recreate schema
+    createSchema();
+
+    // 3. Seed database
+    seedDatabase();
+
+    // 4. Add audit log entry
+    addLog(auditorUser || 'admin', auditorRole || 'admin', 'RESET_BANCO', 'Banco de dados reinicializado para o acervo padrão.');
+
+    res.json({ success: true, message: 'Banco de dados reinicializado com sucesso.' });
+  } catch (err: any) {
+    console.error('Error resetting database:', err);
+    res.status(500).json({ error: 'Erro ao reiniciar o banco de dados: ' + err.message });
   }
 });
 
