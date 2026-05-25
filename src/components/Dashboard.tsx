@@ -479,21 +479,17 @@ export default function Dashboard({ data, contracts, onNavigateToContracts, onSe
                 {activeContractsList.length === 0 ? (
                   <p className="text-xs text-white font-mono text-center py-4">Nenhum contrato ativo neste período.</p>
                 ) : (
-                  activeContractsList.slice(0, 4).map((contract) => {
+                  [...activeContractsList].sort((a, b) => b.value - a.value).slice(0, 4).map((contract) => {
                     const maxVal = Math.max(...activeContractsList.map(c => c.value), 1);
                     const barPercent = Math.min(100, Math.max(10, (contract.value / maxVal) * 100));
                     return (
                       <div key={contract.id} className="space-y-1">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-medium text-white truncate max-w-[170px]" title={contract.object}>
-                            {contract.number} &bull; {contract.object}
+                        <div className="flex justify-between items-center text-xs gap-3">
+                          <span className="font-medium text-white truncate flex-1" title={contract.contractorName}>
+                            {contract.contractorName}
                           </span>
-                          <span className="font-mono text-emerald-400 font-semibold text-right">
-                            {contract.value >= 1000000 
-                              ? `${(contract.value / 1000000).toFixed(1)}M` 
-                              : contract.value >= 1000 
-                              ? `${(contract.value / 1000).toFixed(0)}k` 
-                              : contract.value}
+                          <span className="font-mono text-emerald-400 font-semibold text-right shrink-0">
+                            {contract.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                           </span>
                         </div>
                         <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden">
