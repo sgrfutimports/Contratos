@@ -1288,9 +1288,9 @@ export default function App() {
           wsData.push([a.active ? "ATIVO" : "INATIVO", a.name + (a.warName ? ` (${a.warName})` : ''), a.username, a.cpf, a.role.toUpperCase()]);
         });
       } else {
-        wsData.push(["Contrato N", "Objeto", "Contratada", "CNPJ", "Valor (R$)", "Data Inicio", "Data Termino", "Situacao"]);
+        wsData.push(["No. Contrato", "Razão Social Contratada", "CNPJ", "Objeto e Finalidade Militar", "Valor Homologado", "Vigência Término", "Situação"]);
         reportList.forEach((c: Contract) => {
-          wsData.push([c.number, c.object, c.contractorName, c.cnpj, c.value, c.startDate, c.endDate, c.status.toUpperCase()]);
+          wsData.push([c.number, c.contractorName, c.cnpj, c.object, c.value, c.endDate, c.status.toUpperCase()]);
         });
       }
 
@@ -2597,8 +2597,8 @@ export default function App() {
                     ) : (
                       <tr>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">No. Contrato</th>
-                        <th className="border border-slate-400 p-2 text-center uppercase font-bold">Objeto e Finalidade Militar</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Razão Social Contratada</th>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold">Objeto e Finalidade Militar</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Valor Homologado</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Vigência Término</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Situação</th>
@@ -2661,8 +2661,8 @@ export default function App() {
                           return (
                             <tr key={item.id} className="hover:bg-slate-50">
                               <td className="border border-slate-300 p-2 font-bold whitespace-nowrap">{item.number}</td>
-                              <td className="border border-slate-300 p-2 leading-tight">{item.object}</td>
                               <td className="border border-slate-300 p-2">{item.contractorName} <span className="text-[9px] block text-slate-500">CNPJ: {item.cnpj}</span></td>
+                              <td className="border border-slate-300 p-2 leading-tight">{item.object}</td>
                               <td className="border border-slate-300 p-2 text-right font-bold whitespace-nowrap">
                                 {item.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                               </td>
