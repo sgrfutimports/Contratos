@@ -1256,6 +1256,10 @@ export default function App() {
         reportList = fiscais;
         title = 'Relatório Geral do Efetivo de Fiscais Militares';
         break;
+      case 'usuarios_sistema':
+        reportList = admins;
+        title = 'Relatório Geral de Usuários e Credenciais do Sistema';
+        break;
     }
 
     return { reportList, title };
@@ -1277,6 +1281,11 @@ export default function App() {
         wsData.push(["P/G", "Nome Completo / Nome de Guerra", "CPF", "Email", "Telefone"]);
         reportList.forEach((f: Fiscal) => {
           wsData.push([f.postoGraduacao, f.name + (f.warName ? ` (${f.warName})` : ''), f.cpf, f.email, f.phone]);
+        });
+      } else if (reportType === 'usuarios_sistema') {
+        wsData.push(["Status", "Identificacao", "Usuario/Login", "CPF", "Nivel de Acesso"]);
+        reportList.forEach((a: AdminUser) => {
+          wsData.push([a.active ? "ATIVO" : "INATIVO", a.name + (a.warName ? ` (${a.warName})` : ''), a.username, a.cpf, a.role.toUpperCase()]);
         });
       } else {
         wsData.push(["Contrato N", "Objeto", "Contratada", "CNPJ", "Valor (R$)", "Data Inicio", "Data Termino", "Situacao"]);
@@ -2475,6 +2484,7 @@ export default function App() {
                     <option value="por_fiscal">Contratos por Fiscal</option>
                     <option value="proximos_vencimentos">Contratos Próximos do Vencimento</option>
                     <option value="efetivo_fiscais">Efetivo de Fiscais Militares</option>
+                    <option value="usuarios_sistema">Usuários e Credenciais do Sistema</option>
                     <option value="logs">Logs Administrativos Recentes</option>
                   </select>
                 </div>
@@ -2577,6 +2587,13 @@ export default function App() {
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/6">CPF</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/3">Contato (Email/Tel)</th>
                       </tr>
+                    ) : reportType === 'usuarios_sistema' ? (
+                      <tr>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/12">Status</th>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/3">Identificação e Credenciais</th>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/6">CPF</th>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/4">Nível de Acesso</th>
+                      </tr>
                     ) : (
                       <tr>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">No. Contrato</th>
@@ -2619,6 +2636,25 @@ export default function App() {
                               </td>
                               <td className="border border-slate-300 p-2 text-center font-mono whitespace-nowrap">{item.cpf}</td>
                               <td className="border border-slate-300 p-2 text-center text-[10px] whitespace-normal break-words">{item.email}<br/>{item.phone}</td>
+                            </tr>
+                          );
+                        } else if (reportType === 'usuarios_sistema') {
+                          return (
+                            <tr key={item.id} className="hover:bg-slate-50">
+                              <td className="border border-slate-300 p-2 text-center whitespace-nowrap font-bold text-[10px]">
+                                <span className={item.active ? 'text-emerald-700' : 'text-red-700'}>
+                                  {item.active ? 'ATIVO' : 'INATIVO'}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 p-2 whitespace-normal break-words">
+                                {item.name}
+                                {item.warName && (
+                                  <span className="block font-bold mt-0.5">({item.warName})</span>
+                                )}
+                                <span className="block text-[10px] text-slate-500 mt-1 font-mono uppercase">LGN: {item.username}</span>
+                              </td>
+                              <td className="border border-slate-300 p-2 text-center font-mono whitespace-nowrap">{item.cpf}</td>
+                              <td className="border border-slate-300 p-2 text-center whitespace-nowrap font-bold uppercase text-[10px]">{item.role}</td>
                             </tr>
                           );
                         } else {
