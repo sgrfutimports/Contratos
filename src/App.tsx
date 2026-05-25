@@ -75,6 +75,17 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterFiscal, setFilterFiscal] = useState<string>('all');
   
+  // Sorting & Pagination States
+  const [sortContractsBy, setSortContractsBy] = useState('number');
+  const [sortContractsOrder, setSortContractsOrder] = useState<'asc' | 'desc'>('asc');
+  const [contractsPerPage, setContractsPerPage] = useState<number | 'all'>('all');
+  const [contractsPage, setContractsPage] = useState(1);
+
+  const [sortFiscaisBy, setSortFiscaisBy] = useState('name');
+  const [sortFiscaisOrder, setSortFiscaisOrder] = useState<'asc' | 'desc'>('asc');
+  const [fiscaisPerPage, setFiscaisPerPage] = useState<number | 'all'>('all');
+  const [fiscaisPage, setFiscaisPage] = useState(1);
+  
   // Modals / Form States
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
@@ -1173,6 +1184,36 @@ export default function App() {
     return matchesSearch && matchesStatus && matchesFiscal;
   });
 
+  const sortedContracts = [...filteredContracts].sort((a, b) => {
+    let aVal: any = a[sortContractsBy as keyof Contract];
+    let bVal: any = b[sortContractsBy as keyof Contract];
+    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+    
+    if (aVal < bVal) return sortContractsOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortContractsOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const paginatedContracts = contractsPerPage === 'all' 
+    ? sortedContracts 
+    : sortedContracts.slice((contractsPage - 1) * (contractsPerPage as number), contractsPage * (contractsPerPage as number));
+
+  const sortedFiscais = [...fiscais].sort((a, b) => {
+    let aVal: any = a[sortFiscaisBy as keyof Fiscal];
+    let bVal: any = b[sortFiscaisBy as keyof Fiscal];
+    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+    
+    if (aVal < bVal) return sortFiscaisOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortFiscaisOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const paginatedFiscais = fiscaisPerPage === 'all'
+    ? sortedFiscais
+    : sortedFiscais.slice((fiscaisPage - 1) * (fiscaisPerPage as number), fiscaisPage * (fiscaisPerPage as number));
+
   // --- REPORT GENERATION GENERATORS (Offline printable style with Ejército frame) ---
   const handlePrint = () => {
     window.print();
@@ -1986,6 +2027,25 @@ export default function App() {
                         <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
                       ))}
                     </select>
+
+                    <select
+                      value={`${sortContractsBy}-${sortContractsOrder}`}
+                      onChange={(e) => {
+                        const [by, order] = e.target.value.split('-');
+                        setSortContractsBy(by);
+                        setSortContractsOrder(order as 'asc' | 'desc');
+                      }}
+                      className="bg-slate-700 border border-slate-500 text-xs py-3.5 px-3 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                    >
+                      <option value="number-asc">Contrato (Cresc)</option>
+                      <option value="number-desc">Contrato (Decresc)</option>
+                      <option value="contractorName-asc">Empresa (A-Z)</option>
+                      <option value="contractorName-desc">Empresa (Z-A)</option>
+                      <option value="endDate-asc">Término (Cresc)</option>
+                      <option value="endDate-desc">Término (Decresc)</option>
+                      <option value="value-asc">Valor (Menor-Maior)</option>
+                      <option value="value-desc">Valor (Maior-Menor)</option>
+                    </select>
                   </div>
 
                   {(currentUser.role === 'admin' || currentUser.role === 'gestor') && (
@@ -2001,12 +2061,13 @@ export default function App() {
 
                 {/* Contracts Table Layout */}
                 <div className="bg-slate-800 rounded-xl border border-slate-700 shadow-md overflow-hidden">
-                  <div className="p-4 bg-slate-900/60 uppercase text-[10px] font-bold font-mono tracking-wider text-slate-400 border-b border-slate-700">
-                    Acervo de Contratos Administrativos ({filteredContracts.length})
+                  <div className="p-4 bg-slate-900/60 uppercase text-[10px] font-bold font-mono tracking-wider text-slate-400 border-b border-slate-700 flex justify-between items-center">
+                    <span>Acervo de Contratos Administrativos ({sortedContracts.length})</span>
+                    {contractsPerPage !== 'all' && <span>Exibindo {(contractsPage - 1) * (contractsPerPage as number) + 1} a {Math.min(contractsPage * (contractsPerPage as number), sortedContracts.length)}</span>}
                   </div>
 
                   <div className="overflow-x-auto">
-                    {filteredContracts.length === 0 ? (
+                    {paginatedContracts.length === 0 ? (
                       <div className="text-center py-16 text-slate-500 font-sans">
                         Nenhum contrato corresponde aos filtros solicitados.
                       </div>
@@ -2014,38 +2075,38 @@ export default function App() {
                       <table className="min-w-full divide-y divide-slate-700 text-sm">
                         <thead className="bg-slate-900/30">
                           <tr>
-                            <th className="px-6 py-4 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Contrato / Objeto</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Empresa Fornecedora</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Valor Homologado</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Término</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Fiscais Militares</th>
-                            <th className="px-6 py-4 text-center text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Situação</th>
-                            <th className="px-6 py-4"></th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Contrato / Objeto</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Empresa Fornecedora</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Valor Homologado</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Término</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Fiscais Militares</th>
+                            <th className="px-4 py-3 text-center text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Situação</th>
+                            <th className="px-4 py-3 text-center text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Ações</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-700">
-                          {filteredContracts.map((contract) => {
+                          {paginatedContracts.map((contract) => {
                             const tit = fiscais.find(f => f.id === contract.fiscalTitularId);
                             const sub = fiscais.find(f => f.id === contract.fiscalSubstitutoId);
                             return (
                               <tr key={contract.id} className="hover:bg-slate-700/50 transition-colors">
-                                <td className="px-6 py-4">
+                                <td className="px-4 py-3">
                                   <div className="font-mono text-emerald-400 font-bold text-sm tracking-wide">{contract.number}</div>
-                                  <div className="text-xs text-white font-semibold line-clamp-1 max-w-[250px] mt-0.5" title={contract.object}>
+                                  <div className="text-xs text-white font-semibold line-clamp-1 max-w-[200px] xl:max-w-[250px] mt-0.5" title={contract.object}>
                                     {contract.object}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-xs font-medium text-white">{contract.contractorName}</div>
+                                <td className="px-4 py-3 max-w-[200px]">
+                                  <div className="text-xs font-medium text-white truncate" title={contract.contractorName}>{contract.contractorName}</div>
                                   <div className="text-[10px] font-mono text-slate-500 mt-0.5">CNPJ: {contract.cnpj}</div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-xs font-bold font-mono text-sky-400 text-right">
+                                <td className="px-4 py-3 whitespace-nowrap text-xs font-bold font-mono text-sky-400 text-right">
                                   {contract.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-slate-300 text-center">
+                                <td className="px-4 py-3 whitespace-nowrap text-xs font-mono text-slate-300 text-center">
                                   {contract.endDate.split('-').reverse().join('/')}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-slate-300">
+                                <td className="px-4 py-3 whitespace-nowrap text-slate-300">
                                   <div className="text-[10px] font-sans">
                                     <span className="text-amber-500 font-semibold font-mono">T:</span> {tit ? `${tit.postoGraduacao} ${(tit.warName || tit.name.split(' ')[0]).toUpperCase()}` : 'N/D'}
                                   </div>
@@ -2053,7 +2114,7 @@ export default function App() {
                                     <span className="text-slate-400 font-semibold font-mono">S:</span> {sub ? `${sub.postoGraduacao} ${(sub.warName || sub.name.split(' ')[0]).toUpperCase()}` : 'N/D'}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <td className="px-4 py-3 whitespace-nowrap text-center">
                                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wide border ${
                                     contract.status === 'ativo' 
                                       ? 'bg-emerald-950 text-emerald-400 border-emerald-900/60' 
@@ -2064,20 +2125,82 @@ export default function App() {
                                     {contract.status.replace('_', ' ')}
                                   </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-semibold">
-                                  <button
-                                    onClick={() => setSelectedContract(contract)}
-                                    className="p-1.5 text-emerald-400 hover:text-white hover:bg-emerald-900 rounded transition-colors flex items-center gap-1 cursor-pointer"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                    Auditar
-                                  </button>
+                                <td className="px-4 py-3 whitespace-nowrap text-center">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <button
+                                      onClick={() => setSelectedContract(contract)}
+                                      className="p-1.5 text-emerald-400 bg-emerald-950/50 border border-emerald-900/50 hover:bg-emerald-900 hover:text-white rounded transition-colors flex items-center gap-1 cursor-pointer"
+                                      title="Visualizar/Detalhar"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </button>
+                                    {currentUser.role === 'admin' && (
+                                      <>
+                                        <button
+                                          onClick={() => handleOpenContractModal(contract)}
+                                          className="p-1.5 text-sky-400 bg-sky-950/50 border border-sky-900/50 hover:bg-sky-900 hover:text-white rounded transition-colors flex items-center gap-1 cursor-pointer"
+                                          title="Editar"
+                                        >
+                                          <Edit className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteContract(contract.id, contract.number)}
+                                          className="p-1.5 text-red-400 bg-red-950/50 border border-red-900/50 hover:bg-red-900 hover:text-white rounded transition-colors flex items-center gap-1 cursor-pointer"
+                                          title="Excluir"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             );
                           })}
                         </tbody>
                       </table>
+                    )}
+                  </div>
+                  
+                  <div className="p-4 bg-slate-850 border-t border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">Exibir registros:</span>
+                      <select
+                        value={contractsPerPage}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setContractsPerPage(val === 'all' ? 'all' : Number(val));
+                          setContractsPage(1);
+                        }}
+                        className="bg-slate-700 border border-slate-500 text-xs py-1.5 px-2 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                      >
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">Todos</option>
+                      </select>
+                    </div>
+                    {contractsPerPage !== 'all' && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          disabled={contractsPage === 1}
+                          onClick={() => setContractsPage(prev => Math.max(1, prev - 1))}
+                          className="px-3 py-1 bg-slate-700 disabled:opacity-50 text-white text-xs rounded hover:bg-slate-600 transition-colors cursor-pointer"
+                        >
+                          Anterior
+                        </button>
+                        <span className="text-xs text-slate-400">
+                          Página {contractsPage} de {Math.ceil(sortedContracts.length / (contractsPerPage as number))}
+                        </span>
+                        <button
+                          disabled={contractsPage >= Math.ceil(sortedContracts.length / (contractsPerPage as number))}
+                          onClick={() => setContractsPage(prev => prev + 1)}
+                          className="px-3 py-1 bg-slate-700 disabled:opacity-50 text-white text-xs rounded hover:bg-slate-600 transition-colors cursor-pointer"
+                        >
+                          Próxima
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -2097,88 +2220,163 @@ export default function App() {
                 <h2 className="text-lg font-display font-semibold text-white tracking-tight">Quadro Geral de Fiscais</h2>
               </div>
 
-              <button
-                onClick={() => handleOpenFiscalModal()}
-                className="bg-emerald-800 hover:bg-emerald-700 text-white font-semibold font-display tracking-wider text-xs uppercase px-4 py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-lg shrink-0"
-              >
-                <UserPlus className="h-4 w-4" />
-                Cadastrar Fiscal
-              </button>
+              <div className="flex flex-wrap gap-2 items-center">
+                <select
+                  value={`${sortFiscaisBy}-${sortFiscaisOrder}`}
+                  onChange={(e) => {
+                    const [by, order] = e.target.value.split('-');
+                    setSortFiscaisBy(by);
+                    setSortFiscaisOrder(order as 'asc' | 'desc');
+                  }}
+                  className="bg-slate-700 border border-slate-500 text-xs py-2.5 px-3 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                >
+                  <option value="name-asc">Nome (A-Z)</option>
+                  <option value="name-desc">Nome (Z-A)</option>
+                  <option value="postoGraduacao-asc">Posto/Grad (Cresc)</option>
+                  <option value="postoGraduacao-desc">Posto/Grad (Decresc)</option>
+                  <option value="role-asc">Comissão (A-Z)</option>
+                  <option value="role-desc">Comissão (Z-A)</option>
+                  <option value="status-asc">Situação (A-Z)</option>
+                  <option value="status-desc">Situação (Z-A)</option>
+                </select>
+
+                <button
+                  onClick={() => handleOpenFiscalModal()}
+                  className="bg-emerald-800 hover:bg-emerald-700 text-white font-semibold font-display tracking-wider text-xs uppercase px-4 py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-lg shrink-0"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Cadastrar Fiscal
+                </button>
+              </div>
             </div>
 
-            {/* Fiscais Cards Grid layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="fiscais-grid">
-              {fiscais.map((fiscal) => {
-                // Calculate how many active contracts this fiscal owns
-                const activeTit = contracts.filter(c => c.status === 'ativo' && c.fiscalTitularId === fiscal.id).length;
-                const activeSub = contracts.filter(c => c.status === 'ativo' && c.fiscalSubstitutoId === fiscal.id).length;
+            {/* Fiscais Table Layout */}
+            <div className="bg-slate-800 rounded-xl border border-slate-700 shadow-md overflow-hidden">
+              <div className="p-4 bg-slate-900/60 uppercase text-[10px] font-bold font-mono tracking-wider text-slate-400 border-b border-slate-700 flex justify-between items-center">
+                <span>Efetivo Fiscal ({sortedFiscais.length})</span>
+                {fiscaisPerPage !== 'all' && <span>Exibindo {(fiscaisPage - 1) * (fiscaisPerPage as number) + 1} a {Math.min(fiscaisPage * (fiscaisPerPage as number), sortedFiscais.length)}</span>}
+              </div>
 
-                return (
-                  <div key={fiscal.id} className="bg-slate-700 border border-slate-500 hover:border-slate-600 rounded-xl p-5 shadow flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <span className="px-2.5 py-0.5 text-[9px] font-bold font-sans uppercase tracking-wider bg-slate-800/80 border border-slate-600 text-slate-300 rounded-md flex items-center gap-1.5 shadow-sm">
-                          <UserCheck className="w-3 h-3 text-slate-400" />
-                          Fiscal Militar
-                        </span>
-                        <span className={`h-2.5 w-2.5 rounded-full shadow-sm ${fiscal.status === 'ativo' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-red-500 shadow-red-500/20'}`} title={fiscal.status} />
-                      </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-700 text-sm">
+                  <thead className="bg-slate-900/30">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Identificação Militar</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Contato / CPF</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Comissão</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Contratos Ativos</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Situação</th>
+                      {currentUser.role === 'admin' && (
+                        <th className="px-4 py-3 text-center text-xs font-semibold font-sans uppercase tracking-wider text-slate-400">Ações</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700">
+                    {paginatedFiscais.map((fiscal) => {
+                      const activeTit = contracts.filter(c => c.status === 'ativo' && c.fiscalTitularId === fiscal.id).length;
+                      const activeSub = contracts.filter(c => c.status === 'ativo' && c.fiscalSubstitutoId === fiscal.id).length;
+                      return (
+                        <tr key={fiscal.id} className="hover:bg-slate-700/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="font-mono text-emerald-400 font-bold text-sm tracking-wide">
+                              {fiscal.postoGraduacao} {fiscal.warName || fiscal.name.split(' ').slice(-1)[0]}
+                            </div>
+                            <div className="text-xs text-white font-semibold line-clamp-1 max-w-[250px] mt-0.5" title={fiscal.name}>
+                              {fiscal.name}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-[10px] font-mono text-slate-300">CPF: {fiscal.cpf}</div>
+                            <div className="text-[10px] font-mono text-slate-400 mt-0.5 truncate max-w-[150px]" title={fiscal.email}>{fiscal.email || 'Não informado'}</div>
+                            <div className="text-[10px] font-mono text-slate-400 mt-0.5">{fiscal.phone || 'Não listado'}</div>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wide border ${
+                              fiscal.role === 'titular' ? 'bg-amber-950 text-amber-500 border-amber-900/60' : 
+                              fiscal.role === 'substituto' ? 'bg-purple-950 text-purple-400 border-purple-900/60' : 
+                              'bg-blue-950 text-blue-400 border-blue-900/60'
+                            }`}>
+                              {fiscal.role === 'titular' ? 'Titular' : fiscal.role === 'substituto' ? 'Substituto' : 'Titular/Subst'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-xs font-mono text-slate-300 text-center">
+                            <span className="text-emerald-400 font-bold">{activeTit}</span> T / <span className="text-sky-400 font-bold">{activeSub}</span> S
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-center">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wide border ${
+                              fiscal.status === 'ativo' ? 'bg-emerald-950 text-emerald-400 border-emerald-900/60' : 'bg-red-950 text-red-500 border-red-900/60'
+                            }`}>
+                              {fiscal.status.toUpperCase()}
+                            </span>
+                          </td>
+                          {currentUser.role === 'admin' && (
+                            <td className="px-4 py-3 whitespace-nowrap text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => handleOpenFiscalModal(fiscal)}
+                                  className="p-1.5 text-sky-400 bg-sky-950/50 border border-sky-900/50 hover:bg-sky-900 hover:text-white rounded transition-colors flex items-center gap-1 cursor-pointer"
+                                  title="Editar"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteFiscal(fiscal.id, fiscal.name)}
+                                  className="p-1.5 text-red-400 bg-red-950/50 border border-red-900/50 hover:bg-red-900 hover:text-white rounded transition-colors flex items-center gap-1 cursor-pointer"
+                                  title="Excluir"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-                      <h3 className="text-xl font-display font-bold text-white mt-4 truncate uppercase tracking-wide drop-shadow-sm">
-                        {fiscal.postoGraduacao} {fiscal.warName || fiscal.name.split(' ').slice(-1)[0]}
-                      </h3>
-                      <p className="text-[11px] font-sans text-slate-400 mt-0.5 uppercase tracking-wider truncate" title={fiscal.name}>
-                        {fiscal.name}
-                      </p>
-                      
-                      <div className="mt-5 space-y-2 text-[11px] text-slate-300 font-sans bg-slate-800/40 p-3 rounded-lg border border-slate-700/50">
-                        <div className="flex justify-between items-center border-b border-slate-700/50 pb-1.5">
-                          <span className="text-slate-400 uppercase tracking-wider text-[9px] font-bold">CPF</span>
-                          <span className="font-mono text-slate-200">{fiscal.cpf}</span>
-                        </div>
-                        <div className="flex flex-col border-b border-slate-700/50 pb-1.5 gap-0.5">
-                          <span className="text-slate-400 uppercase tracking-wider text-[9px] font-bold">Email</span>
-                          <span className="font-mono text-slate-200 truncate">{fiscal.email || 'Não informado'}</span>
-                        </div>
-                        <div className="flex justify-between items-center border-b border-slate-700/50 pb-1.5">
-                          <span className="text-slate-400 uppercase tracking-wider text-[9px] font-bold">Telefone</span>
-                          <span className="font-mono text-slate-200">{fiscal.phone || 'Não listado'}</span>
-                        </div>
-                        <div className="pt-1">
-                          <span className={`uppercase tracking-wider text-[9px] font-mono px-2 py-1 rounded-md border font-bold inline-block ${
-                            fiscal.role === 'titular' ? 'bg-amber-900/30 text-amber-400 border-amber-900/50' : 
-                            fiscal.role === 'substituto' ? 'bg-purple-900/30 text-purple-400 border-purple-900/50' : 
-                            'bg-blue-900/30 text-blue-400 border-blue-900/50'
-                          }`}>
-                            Comissão: {fiscal.role === 'titular' ? 'Titular nato' : fiscal.role === 'substituto' ? 'Substituto eventual' : 'Titular e Substituto'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 pt-4 border-t border-slate-700/70 flex justify-between items-center bg-transparent">
-                      <div className="text-[10px] font-mono text-slate-400">
-                        Contratos Ativos: <span className="font-bold text-emerald-400">{activeTit}</span> T / <span className="font-bold text-sky-400">{activeSub}</span> S
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleOpenFiscalModal(fiscal)}
-                          className="p-1 px-2.5 bg-slate-900 text-[11px] text-sky-400 border border-slate-700 rounded hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDeleteFiscal(fiscal.id, fiscal.name)}
-                          className="p-1 px-2.5 bg-red-950/40 text-[11px] text-red-400 border border-red-900 rounded hover:bg-red-900 hover:text-white transition-all cursor-pointer"
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    </div>
+              <div className="p-4 bg-slate-850 border-t border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400">Exibir registros:</span>
+                  <select
+                    value={fiscaisPerPage}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFiscaisPerPage(val === 'all' ? 'all' : Number(val));
+                      setFiscaisPage(1);
+                    }}
+                    className="bg-slate-700 border border-slate-500 text-xs py-1.5 px-2 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  >
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">Todos</option>
+                  </select>
+                </div>
+                {fiscaisPerPage !== 'all' && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      disabled={fiscaisPage === 1}
+                      onClick={() => setFiscaisPage(prev => Math.max(1, prev - 1))}
+                      className="px-3 py-1 bg-slate-700 disabled:opacity-50 text-white text-xs rounded hover:bg-slate-600 transition-colors cursor-pointer"
+                    >
+                      Anterior
+                    </button>
+                    <span className="text-xs text-slate-400">
+                      Página {fiscaisPage} de {Math.ceil(sortedFiscais.length / (fiscaisPerPage as number))}
+                    </span>
+                    <button
+                      disabled={fiscaisPage >= Math.ceil(sortedFiscais.length / (fiscaisPerPage as number))}
+                      onClick={() => setFiscaisPage(prev => prev + 1)}
+                      className="px-3 py-1 bg-slate-700 disabled:opacity-50 text-white text-xs rounded hover:bg-slate-600 transition-colors cursor-pointer"
+                    >
+                      Próxima
+                    </button>
                   </div>
-                );
-              })}
+                )}
+              </div>
             </div>
 
           </div>
