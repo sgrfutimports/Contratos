@@ -1274,9 +1274,9 @@ export default function App() {
           wsData.push([l.date, l.user, l.role, l.action, l.detail, l.ipAddress]);
         });
       } else if (reportType === 'efetivo_fiscais') {
-        wsData.push(["Nome Completo", "Posto/Graduacao", "Nome de Guerra", "CPF", "Email", "Telefone"]);
+        wsData.push(["P/G", "Nome Completo / Nome de Guerra", "CPF", "Email", "Telefone"]);
         reportList.forEach((f: Fiscal) => {
-          wsData.push([f.name, f.postoGraduacao, f.warName || '', f.cpf, f.email, f.phone]);
+          wsData.push([f.postoGraduacao, f.name + (f.warName ? ` (${f.warName})` : ''), f.cpf, f.email, f.phone]);
         });
       } else {
         wsData.push(["Contrato N", "Objeto", "Contratada", "CNPJ", "Valor (R$)", "Data Inicio", "Data Termino", "Situacao"]);
@@ -2572,8 +2572,8 @@ export default function App() {
                       </tr>
                     ) : reportType === 'efetivo_fiscais' ? (
                       <tr>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/12" title="Posto/Graduação">P/G</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/3">Identificação Militar</th>
-                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/6">Posto/Graduação</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/6">CPF</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/3">Contato (Email/Tel)</th>
                       </tr>
@@ -2610,8 +2610,8 @@ export default function App() {
                         } else if (reportType === 'efetivo_fiscais') {
                           return (
                             <tr key={item.id} className="hover:bg-slate-50">
+                              <td className="border border-slate-300 p-2 text-center whitespace-nowrap font-bold">{item.postoGraduacao}</td>
                               <td className="border border-slate-300 p-2 whitespace-normal break-words">{item.name} {item.warName ? `(${item.warName})` : ''}</td>
-                              <td className="border border-slate-300 p-2 text-center whitespace-nowrap">{item.postoGraduacao}</td>
                               <td className="border border-slate-300 p-2 text-center font-mono whitespace-nowrap">{item.cpf}</td>
                               <td className="border border-slate-300 p-2 text-center text-[10px] whitespace-normal break-words">{item.email}<br/>{item.phone}</td>
                             </tr>
