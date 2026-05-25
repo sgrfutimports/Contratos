@@ -2611,7 +2611,12 @@ export default function App() {
                           return (
                             <tr key={item.id} className="hover:bg-slate-50">
                               <td className="border border-slate-300 p-2 text-center whitespace-nowrap font-bold">{item.postoGraduacao}</td>
-                              <td className="border border-slate-300 p-2 whitespace-normal break-words">{item.name} {item.warName ? `(${item.warName})` : ''}</td>
+                              <td className="border border-slate-300 p-2 whitespace-normal break-words">
+                                {item.name}
+                                {item.warName && (
+                                  <span className="block font-bold mt-0.5">({item.warName})</span>
+                                )}
+                              </td>
                               <td className="border border-slate-300 p-2 text-center font-mono whitespace-nowrap">{item.cpf}</td>
                               <td className="border border-slate-300 p-2 text-center text-[10px] whitespace-normal break-words">{item.email}<br/>{item.phone}</td>
                             </tr>
