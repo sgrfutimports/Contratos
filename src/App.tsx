@@ -1273,9 +1273,34 @@ export default function App() {
       
       let wsData = [];
       if (reportType === 'logs') {
-        wsData.push(["Data", "Usuario", "Perfil", "Operacao", "Detalhe", "IP"]);
+        wsData.push(["Data", "Militar Responsável", "Perfil", "Operação", "Detalhe"]);
         reportList.forEach((l: SystemLog) => {
-          wsData.push([l.date, l.user, l.role, l.action, l.detail, l.ipAddress]);
+          const adminMatch = admins.find(a => 
+            a.username.toLowerCase() === l.user.toLowerCase() || 
+            a.name.toLowerCase() === l.user.toLowerCase() ||
+            l.user.toLowerCase().includes(a.username.toLowerCase()) ||
+            (a.warName && l.user.toLowerCase().includes(a.warName.toLowerCase()))
+          );
+          const formatRank = (r: string) => {
+            if (!r) return '';
+            const map: Record<string, string> = {
+              '1º sargento': '1º Sgt', '2º sargento': '2º Sgt', '3º sargento': '3º Sgt',
+              'primeiro sargento': '1º Sgt', 'segundo sargento': '2º Sgt', 'terceiro sargento': '3º Sgt',
+              'subtenente': 'S Ten', '1º tenente': '1º Ten', '2º tenente': '2º Ten',
+              'primeiro tenente': '1º Ten', 'segundo tenente': '2º Ten',
+              'tenente coronel': 'Ten Cel', 'tenente-coronel': 'Ten Cel',
+              'capitão': 'Cap', 'capitao': 'Cap', 'major': 'Maj', 'coronel': 'Cel',
+              'tenente': 'Ten', 'sargento': 'Sgt', 'cabo': 'Cb', 'soldado': 'Sd'
+            };
+            return map[r.toLowerCase().trim()] || r;
+          };
+          let standardizedUser = l.user.toUpperCase();
+          if (adminMatch) {
+            const rankAbbrev = adminMatch.rank ? formatRank(adminMatch.rank) + ' ' : '';
+            const namePart = (adminMatch.warName || adminMatch.name).toUpperCase();
+            standardizedUser = `${rankAbbrev}${namePart}`;
+          }
+          wsData.push([l.date, standardizedUser, l.role, l.action, l.detail]);
         });
       } else if (reportType === 'efetivo_fiscais') {
         wsData.push(["P/G", "Nome Completo / Nome de Guerra", "CPF", "Email", "Telefone"]);
@@ -2578,7 +2603,6 @@ export default function App() {
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Militar Responsável</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Ação Operada</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Detalhe Estrutural</th>
-                        <th className="border border-slate-400 p-2 text-center uppercase font-bold">IP</th>
                       </tr>
                     ) : reportType === 'efetivo_fiscais' ? (
                       <tr>
@@ -2615,13 +2639,40 @@ export default function App() {
                     ) : (
                       getReportData().reportList.map((item: any, idx: number) => {
                         if (reportType === 'logs') {
+                          const adminMatch = admins.find(a => 
+                            a.username.toLowerCase() === item.user.toLowerCase() || 
+                            a.name.toLowerCase() === item.user.toLowerCase() ||
+                            item.user.toLowerCase().includes(a.username.toLowerCase()) ||
+                            (a.warName && item.user.toLowerCase().includes(a.warName.toLowerCase()))
+                          );
+                          const formatRank = (r: string) => {
+                            if (!r) return '';
+                            const map: Record<string, string> = {
+                              '1º sargento': '1º Sgt', '2º sargento': '2º Sgt', '3º sargento': '3º Sgt',
+                              'primeiro sargento': '1º Sgt', 'segundo sargento': '2º Sgt', 'terceiro sargento': '3º Sgt',
+                              'subtenente': 'S Ten', '1º tenente': '1º Ten', '2º tenente': '2º Ten',
+                              'primeiro tenente': '1º Ten', 'segundo tenente': '2º Ten',
+                              'tenente coronel': 'Ten Cel', 'tenente-coronel': 'Ten Cel',
+                              'capitão': 'Cap', 'capitao': 'Cap', 'major': 'Maj', 'coronel': 'Cel',
+                              'tenente': 'Ten', 'sargento': 'Sgt', 'cabo': 'Cb', 'soldado': 'Sd'
+                            };
+                            return map[r.toLowerCase().trim()] || r;
+                          };
+                          let standardizedUser = item.user.toUpperCase();
+                          if (adminMatch) {
+                            const rankAbbrev = adminMatch.rank ? formatRank(adminMatch.rank) + ' ' : '';
+                            const namePart = (adminMatch.warName || adminMatch.name).toUpperCase();
+                            standardizedUser = `${rankAbbrev}${namePart}`;
+                          }
                           return (
                             <tr key={idx} className="hover:bg-slate-50">
-                              <td className="border border-slate-300 p-2 whitespace-nowrap">{item.date}</td>
-                              <td className="border border-slate-300 p-2 font-semibold">{item.user} ({item.role})</td>
-                              <td className="border border-slate-300 p-2 font-bold text-amber-900">{item.action}</td>
-                              <td className="border border-slate-300 p-2">{item.detail}</td>
-                              <td className="border border-slate-300 p-2">{item.ipAddress}</td>
+                              <td className="border border-slate-300 p-2 whitespace-nowrap text-center font-mono">{item.date}</td>
+                              <td className="border border-slate-300 p-2 font-semibold text-center">
+                                <span className="block font-bold">{standardizedUser}</span>
+                                <span className="text-[9px] text-slate-500 uppercase block">({item.role})</span>
+                              </td>
+                              <td className="border border-slate-300 p-2 font-bold text-amber-900 text-center">{item.action}</td>
+                              <td className="border border-slate-300 p-2 text-[10px]">{item.detail}</td>
                             </tr>
                           );
                         } else if (reportType === 'efetivo_fiscais') {
