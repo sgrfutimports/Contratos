@@ -2716,8 +2716,24 @@ export default function App() {
                       </td>
                       <td className="px-4 py-2.5 text-slate-400 whitespace-nowrap">{log.ipAddress}</td>
                       <td className="px-4 py-2.5 whitespace-nowrap">
-                        <span className="font-bold text-emerald-450">{log.user}</span>
-                        <span className="text-[10px] text-slate-500 block">({log.role.toUpperCase()})</span>
+                        {(() => {
+                          const adminMatch = admins.find(a => 
+                            a.username.toLowerCase() === log.user.toLowerCase() || 
+                            a.name.toLowerCase() === log.user.toLowerCase() ||
+                            log.user.toLowerCase().includes(a.username.toLowerCase()) ||
+                            (a.warName && log.user.toLowerCase().includes(a.warName.toLowerCase()))
+                          );
+                          const standardizedUser = adminMatch 
+                            ? `${adminMatch.rank ? adminMatch.rank + ' ' : ''}${adminMatch.warName || adminMatch.name}`.toUpperCase() 
+                            : log.user.toUpperCase();
+                          
+                          return (
+                            <>
+                              <span className="font-bold text-emerald-450">{standardizedUser}</span>
+                              <span className="text-[10px] text-slate-500 block">({log.role.toUpperCase()})</span>
+                            </>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-2.5 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${
