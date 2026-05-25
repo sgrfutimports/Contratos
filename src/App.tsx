@@ -2723,9 +2723,28 @@ export default function App() {
                             log.user.toLowerCase().includes(a.username.toLowerCase()) ||
                             (a.warName && log.user.toLowerCase().includes(a.warName.toLowerCase()))
                           );
-                          const standardizedUser = adminMatch 
-                            ? `${adminMatch.rank ? adminMatch.rank + ' ' : ''}${adminMatch.warName || adminMatch.name}`.toUpperCase() 
-                            : log.user.toUpperCase();
+                          
+                          const formatRank = (r: string) => {
+                            if (!r) return '';
+                            const map: Record<string, string> = {
+                              '1º sargento': '1º Sgt', '2º sargento': '2º Sgt', '3º sargento': '3º Sgt',
+                              'primeiro sargento': '1º Sgt', 'segundo sargento': '2º Sgt', 'terceiro sargento': '3º Sgt',
+                              'subtenente': 'S Ten', '1º tenente': '1º Ten', '2º tenente': '2º Ten',
+                              'primeiro tenente': '1º Ten', 'segundo tenente': '2º Ten',
+                              'tenente coronel': 'Ten Cel', 'tenente-coronel': 'Ten Cel',
+                              'capitão': 'Cap', 'capitao': 'Cap', 'major': 'Maj', 'coronel': 'Cel',
+                              'tenente': 'Ten', 'sargento': 'Sgt', 'cabo': 'Cb', 'soldado': 'Sd'
+                            };
+                            const lower = r.toLowerCase().trim();
+                            return map[lower] || r;
+                          };
+
+                          let standardizedUser = log.user.toUpperCase();
+                          if (adminMatch) {
+                            const rankAbbrev = adminMatch.rank ? formatRank(adminMatch.rank) + ' ' : '';
+                            const namePart = (adminMatch.warName || adminMatch.name).toUpperCase();
+                            standardizedUser = `${rankAbbrev}${namePart}`;
+                          }
                           
                           return (
                             <>
