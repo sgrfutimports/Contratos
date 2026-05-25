@@ -1305,7 +1305,12 @@ export default function App() {
             const namePart = (adminMatch.warName || adminMatch.name).toUpperCase();
             standardizedUser = `${rankAbbrev}${namePart}`;
           }
-          wsData.push([l.date, standardizedUser, l.role, l.action, l.detail]);
+          let formattedDate = l.date;
+          if (formattedDate && formattedDate.length === 19 && formattedDate.includes(' ')) {
+            const d = new Date(formattedDate.replace(' ', 'T') + 'Z');
+            if (!isNaN(d.getTime())) formattedDate = d.toLocaleString('pt-BR');
+          }
+          wsData.push([formattedDate, standardizedUser, l.role, l.action, l.detail]);
         });
       } else if (reportType === 'efetivo_fiscais') {
         wsData.push(["P/G", "Nome Completo / Nome de Guerra", "CPF", "Email", "Telefone"]);
@@ -2669,9 +2674,14 @@ export default function App() {
                             const namePart = (adminMatch.warName || adminMatch.name).toUpperCase();
                             standardizedUser = `${rankAbbrev}${namePart}`;
                           }
+                          let formattedDate = item.date;
+                          if (formattedDate && formattedDate.length === 19 && formattedDate.includes(' ')) {
+                            const d = new Date(formattedDate.replace(' ', 'T') + 'Z');
+                            if (!isNaN(d.getTime())) formattedDate = d.toLocaleString('pt-BR');
+                          }
                           return (
                             <tr key={idx} className="hover:bg-slate-50">
-                              <td className="border border-slate-300 p-2 whitespace-nowrap text-center font-mono">{item.date}</td>
+                              <td className="border border-slate-300 p-2 whitespace-nowrap text-center font-mono">{formattedDate}</td>
                               <td className="border border-slate-300 p-2 font-semibold text-center">
                                 <span className="block font-bold">{standardizedUser}</span>
                                 <span className="text-[9px] text-slate-500 uppercase block">({item.role})</span>
