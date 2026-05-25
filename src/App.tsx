@@ -145,7 +145,7 @@ export default function App() {
   });
 
   // Report Form Query
-  const [reportType, setReportType] = useState<'ativos' | 'vencidos' | 'por_fiscal' | 'proximos_vencimentos' | 'logs'>('ativos');
+  const [reportType, setReportType] = useState<'ativos' | 'vencidos' | 'por_fiscal' | 'proximos_vencimentos' | 'logs' | 'efetivo_fiscais'>('ativos');
   const [reportFiscalId, setReportFiscalId] = useState<string>('all');
   const [reportDaysOut, setReportDaysOut] = useState<string>('90');
 
@@ -1252,6 +1252,10 @@ export default function App() {
         reportList = logs.slice(0, 100);
         title = 'Auditoria Consolidada de Logs e Alterações Estruturais do Sistema';
         break;
+      case 'efetivo_fiscais':
+        reportList = fiscais;
+        title = 'Relatório Geral do Efetivo de Fiscais Militares';
+        break;
     }
 
     return { reportList, title };
@@ -1268,6 +1272,11 @@ export default function App() {
         wsData.push(["Data", "Usuario", "Perfil", "Operacao", "Detalhe", "IP"]);
         reportList.forEach((l: SystemLog) => {
           wsData.push([l.date, l.user, l.role, l.action, l.detail, l.ipAddress]);
+        });
+      } else if (reportType === 'efetivo_fiscais') {
+        wsData.push(["Nome Completo", "Posto/Graduacao", "Nome de Guerra", "CPF", "Email", "Telefone"]);
+        reportList.forEach((f: Fiscal) => {
+          wsData.push([f.name, f.postoGraduacao, f.warName || '', f.cpf, f.email, f.phone]);
         });
       } else {
         wsData.push(["Contrato N", "Objeto", "Contratada", "CNPJ", "Valor (R$)", "Data Inicio", "Data Termino", "Situacao"]);
@@ -2465,6 +2474,7 @@ export default function App() {
                     <option value="vencidos">Contratos Vencidos (Expirados)</option>
                     <option value="por_fiscal">Contratos por Fiscal</option>
                     <option value="proximos_vencimentos">Contratos Próximos do Vencimento</option>
+                    <option value="efetivo_fiscais">Efetivo de Fiscais Militares</option>
                     <option value="logs">Logs Administrativos Recentes</option>
                   </select>
                 </div>
@@ -2560,6 +2570,13 @@ export default function App() {
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">Detalhe Estrutural</th>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">IP</th>
                       </tr>
+                    ) : reportType === 'efetivo_fiscais' ? (
+                      <tr>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/3">Identificação Militar</th>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/6">Posto/Graduação</th>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/6">CPF</th>
+                        <th className="border border-slate-400 p-2 text-center uppercase font-bold w-1/3">Contato (Email/Tel)</th>
+                      </tr>
                     ) : (
                       <tr>
                         <th className="border border-slate-400 p-2 text-center uppercase font-bold">No. Contrato</th>
@@ -2590,6 +2607,15 @@ export default function App() {
                               <td className="border border-slate-300 p-2">{item.ipAddress}</td>
                             </tr>
                           );
+                        } else if (reportType === 'efetivo_fiscais') {
+                          return (
+                            <tr key={item.id} className="hover:bg-slate-50">
+                              <td className="border border-slate-300 p-2 whitespace-normal break-words">{item.name} {item.warName ? `(${item.warName})` : ''}</td>
+                              <td className="border border-slate-300 p-2 text-center whitespace-nowrap">{item.postoGraduacao}</td>
+                              <td className="border border-slate-300 p-2 text-center font-mono whitespace-nowrap">{item.cpf}</td>
+                              <td className="border border-slate-300 p-2 text-center text-[10px] whitespace-normal break-words">{item.email}<br/>{item.phone}</td>
+                            </tr>
+                          );
                         } else {
                           return (
                             <tr key={item.id} className="hover:bg-slate-50">
@@ -2615,7 +2641,7 @@ export default function App() {
               </div>
 
               {/* Total Aggregate math footer for printable format */}
-              {reportType !== 'logs' && getReportData().reportList.length > 0 && (
+              {reportType !== 'logs' && reportType !== 'efetivo_fiscais' && getReportData().reportList.length > 0 && (
                 <div className="flex justify-end pt-2 border-t border-slate-200">
                   <div className="p-3.5 bg-slate-50 border border-slate-200 text-right space-y-1 rounded">
                     <p className="text-[10px] text-slate-500 uppercase tracking-wider">Metrificação da Amostra</p>
