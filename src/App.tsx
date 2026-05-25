@@ -4,6 +4,11 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+
+// Global variables injected by Vite based on git state
+declare const __APP_VERSION__: string;
+declare const __GIT_HASH__: string;
+declare const __GIT_DATE__: string;
 import { 
   Shield, 
   Search, 
@@ -3593,7 +3598,7 @@ export default function App() {
           71º BATALHÃO DE INFANTARIA MOTORIZADO
         </div>
         <div className="text-[9px] text-slate-600">
-          Rodovia BR 423, Km 96, s/n - Heliópolis, Garanhuns - PE, 55296-630 &bull; Versão 1.5.0 (Local Host Client)
+          Rodovia BR 423, Km 96, s/n - Heliópolis, Garanhuns - PE, 55296-630 &bull; Versão {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.5.0'} (Build {typeof __GIT_HASH__ !== 'undefined' ? __GIT_HASH__ : 'local'} - {typeof __GIT_DATE__ !== 'undefined' ? __GIT_DATE__ : 'dev'})
         </div>
         <div className="text-[10px] text-slate-500">
           Direitos Autorais Reservados &copy; 2026 71º BI Mtz &bull; Desenvolvido por 1º Sgt Gaudencio
