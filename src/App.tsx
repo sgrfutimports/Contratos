@@ -3125,8 +3125,9 @@ export default function App() {
                     className="mt-1 block w-full bg-slate-700 border border-slate-500 rounded-lg text-xs px-3 py-2.5 text-slate-200 focus:outline-none cursor-pointer"
                   >
                     <option value="">Selecione o militar titular...</option>
-                    {fiscais
+                    {[...fiscais]
                       .filter(f => f.role === 'titular' || f.role === 'ambos' || f.id === contractForm.fiscalTitularId)
+                      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
                       .map(f => (
                         <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
                       ))}
@@ -3140,8 +3141,9 @@ export default function App() {
                     className="mt-1 block w-full bg-slate-700 border border-slate-500 rounded-lg text-xs px-3 py-2.5 text-slate-200 focus:outline-none cursor-pointer"
                   >
                     <option value="">Selecione o militar substituto eventual...</option>
-                    {fiscais
+                    {[...fiscais]
                       .filter(f => f.role === 'substituto' || f.role === 'ambos' || f.id === contractForm.fiscalSubstitutoId)
+                      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
                       .map(f => (
                         <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
                       ))}
