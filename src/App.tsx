@@ -1319,7 +1319,7 @@ export default function App() {
         });
       } else if (reportType === 'usuarios_sistema') {
         wsData.push(["Status", "Identificacao", "Usuario/Login", "CPF", "Nivel de Acesso"]);
-        reportList.forEach((a: AdminUser) => {
+        reportList.forEach((a: User) => {
           wsData.push([a.active ? "ATIVO" : "INATIVO", a.name + (a.warName ? ` (${a.warName})` : ''), a.username, a.cpf, a.role.toUpperCase()]);
         });
       } else {
@@ -3125,9 +3125,11 @@ export default function App() {
                     className="mt-1 block w-full bg-slate-700 border border-slate-500 rounded-lg text-xs px-3 py-2.5 text-slate-200 focus:outline-none cursor-pointer"
                   >
                     <option value="">Selecione o militar titular...</option>
-                    {fiscais.map(f => (
-                      <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
-                    ))}
+                    {fiscais
+                      .filter(f => f.role === 'titular' || f.role === 'ambos' || f.id === contractForm.fiscalTitularId)
+                      .map(f => (
+                        <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
+                      ))}
                   </select>
                 </div>
                 <div>
@@ -3138,9 +3140,11 @@ export default function App() {
                     className="mt-1 block w-full bg-slate-700 border border-slate-500 rounded-lg text-xs px-3 py-2.5 text-slate-200 focus:outline-none cursor-pointer"
                   >
                     <option value="">Selecione o militar substituto eventual...</option>
-                    {fiscais.map(f => (
-                      <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
-                    ))}
+                    {fiscais
+                      .filter(f => f.role === 'substituto' || f.role === 'ambos' || f.id === contractForm.fiscalSubstitutoId)
+                      .map(f => (
+                        <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
+                      ))}
                   </select>
                 </div>
               </div>
