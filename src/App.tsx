@@ -2076,9 +2076,11 @@ export default function App() {
                       className="bg-slate-700 border border-slate-500 text-xs py-3.5 px-3 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
                     >
                       <option value="all">Fiscais (Todos)</option>
-                      {fiscais.map(f => (
-                        <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
-                      ))}
+                      {[...fiscais]
+                        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+                        .map(f => (
+                          <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
+                        ))}
                     </select>
 
                     <select
@@ -2533,9 +2535,11 @@ export default function App() {
                       className="bg-slate-700 border border-slate-500 text-xs py-2 px-3 rounded-lg text-white font-medium focus:ring-1 focus:ring-emerald-500 cursor-pointer"
                     >
                       <option value="all">Escolha o militar...</option>
-                      {fiscais.map(f => (
-                        <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
-                      ))}
+                      {[...fiscais]
+                        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+                        .map(f => (
+                          <option key={f.id} value={f.id}>{f.postoGraduacao} {f.name}</option>
+                        ))}
                     </select>
                   </div>
                 )}
