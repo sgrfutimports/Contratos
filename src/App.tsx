@@ -150,7 +150,16 @@ export default function App() {
   });
 
   // Report Form Query
-  const [reportType, setReportType] = useState<'ativos' | 'vencidos' | 'por_fiscal' | 'proximos_vencimentos' | 'logs' | 'efetivo_fiscais'>('ativos');
+  const [reportType, setReportType] = useState<
+    | 'ativos'
+    | 'vencidos'
+    | 'por_fiscal'
+    | 'proximos_vencimentos'
+    | 'logs'
+    | 'efetivo_fiscais'
+    | 'usuarios_sistema'
+    | 'designacao_fiscais'
+  >('ativos');
   const [reportFiscalId, setReportFiscalId] = useState<string>('all');
   const [reportDaysOut, setReportDaysOut] = useState<string>('90');
 
@@ -1265,6 +1274,10 @@ export default function App() {
         reportList = admins;
         title = 'Relatório Geral de Usuários e Credenciais do Sistema';
         break;
+      case 'designacao_fiscais':
+        reportList = contracts.filter(c => c.status === 'ativo' || c.status === 'em_vencimento');
+        title = 'Designação de Fiscais de Contrato (Art. 117, Lei nº 14.133/21)';
+        break;
     }
 
     return { reportList, title };
@@ -1321,6 +1334,28 @@ export default function App() {
         wsData.push(["Status", "Identificacao", "Usuario/Login", "CPF", "Nivel de Acesso"]);
         reportList.forEach((a: User) => {
           wsData.push([a.active ? "ATIVO" : "INATIVO", a.name + (a.warName ? ` (${a.warName})` : ''), a.username, a.cpf, a.role.toUpperCase()]);
+        });
+      } else if (reportType === 'designacao_fiscais') {
+        wsData.push(["Nº Contrato", "Razão Social Contratada", "CNPJ", "Fiscal de Contrato Titular", "Fiscal de Contrato Substituto"]);
+        reportList.forEach((c: Contract) => {
+          const titular = fiscais.find(f => f.id === c.fiscalTitularId);
+          const substituto = fiscais.find(f => f.id === c.fiscalSubstitutoId);
+          
+          const formatFiscalName = (f: Fiscal | undefined) => {
+            if (!f) return 'Não designado';
+            const rank = f.postoGraduacao;
+            const fullName = f.name.toUpperCase();
+            const warName = f.warName ? f.warName.toUpperCase() : '';
+            return `${rank} ${fullName}${warName ? ` (${rank} ${warName})` : ''}`;
+          };
+
+          wsData.push([
+            c.number,
+            c.contractorName.toUpperCase(),
+            formatCpfCnpj(c.cnpj),
+            formatFiscalName(titular),
+            formatFiscalName(substituto)
+          ]);
         });
       } else {
         wsData.push(["No. Contrato", "Razão Social Contratada", "CNPJ", "Objeto e Finalidade Militar", "Valor Homologado", "Vigência Término", "Situação"]);
@@ -2520,6 +2555,7 @@ export default function App() {
                     <option value="vencidos">Contratos Vencidos (Expirados)</option>
                     <option value="por_fiscal">Contratos por Fiscal</option>
                     <option value="proximos_vencimentos">Contratos Próximos do Vencimento</option>
+                    <option value="designacao_fiscais">Designação de Fiscais (Art. 117)</option>
                     <option value="efetivo_fiscais">Efetivo de Fiscais Militares</option>
                     <option value="usuarios_sistema">Usuários e Credenciais do Sistema</option>
                     <option value="logs">Logs Administrativos Recentes</option>
@@ -2585,11 +2621,12 @@ export default function App() {
             <div className="bg-white text-slate-900 p-8 md:p-12 rounded-xl shadow-2xl border border-slate-700/20 max-w-4xl mx-auto print:shadow-none print:border-none print:p-0 print:my-0 text-xs space-y-8 animate-fadeIn" id="printable-area" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
               
               {/* Printable military official coat styling */}
-              <div className="text-center text-slate-900 space-y-1 border-b-2 border-slate-950 pb-4">
-                <p className="font-bold uppercase tracking-widest text-sm leading-tight">MINISTÉRIO DA DEFESA</p>
-                <p className="font-bold uppercase tracking-widest text-sm leading-tight">EXÉRCITO BRASILEIRO</p>
-                <p className="uppercase text-xs leading-tight font-bold">71º BATALHÃO DE INFANTARIA MOTORIZADO</p>
-                <p className="uppercase text-[10px] font-bold text-slate-600">BATALHÃO DUARTE COELHO</p>
+              <div className="text-center text-slate-900 space-y-1 border-b-2 border-slate-950 pb-4 flex flex-col items-center">
+                <img src="/brasao.png" alt="Brasão das Armas do Brasil" className="h-16 w-auto mb-2" />
+                <p className="font-bold uppercase tracking-widest text-sm leading-tight font-sans">MINISTÉRIO DA DEFESA</p>
+                <p className="font-bold uppercase tracking-widest text-sm leading-tight font-sans">EXÉRCITO BRASILEIRO</p>
+                <p className="uppercase text-xs leading-tight font-bold font-sans">71º BATALHÃO DE INFANTARIA MOTORIZADO</p>
+                <p className="uppercase text-[10px] font-bold font-sans text-slate-700">(BATALHÃO DUARTE COELHO/1993)</p>
                 <div className="pt-2">
                   <div className="h-1 w-20 bg-slate-900 mx-auto" />
                 </div>
@@ -2607,9 +2644,83 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Report Content Table representation */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y-2 divide-slate-950 border-collapse border border-slate-350 text-[11px] leading-tight" id="report-table">
+              {/* Report Content representation */}
+              {reportType === 'designacao_fiscais' ? (
+                <div className="text-slate-900 text-xs space-y-6 leading-relaxed" id="report-text-content">
+                  <p className="text-justify font-sans">
+                    Conforme prescreve o Art nº 117, da Lei nº 14.133 de 1º de abril de 2021, designo os militares abaixo relacionados, para cumprir as atribuições de Fiscal de Contrato, celebrado com os respectivos prestadores de serviços:
+                  </p>
+                  
+                  <div className="space-y-4 font-sans text-left font-normal text-slate-900 leading-normal">
+                    {getReportData().reportList.length === 0 ? (
+                      <p className="text-center py-6 text-slate-500 italic border border-slate-300">
+                        Nenhum contrato passível de designação sob os critérios especificados.
+                      </p>
+                    ) : (() => {
+                      interface ContractGroup {
+                        fiscalTitularId: string;
+                        fiscalSubstitutoId: string;
+                        contracts: Contract[];
+                      }
+                      const groups: ContractGroup[] = [];
+                      getReportData().reportList.forEach(c => {
+                        let group = groups.find(g => g.fiscalTitularId === c.fiscalTitularId && g.fiscalSubstitutoId === c.fiscalSubstitutoId);
+                        if (!group) {
+                          group = {
+                            fiscalTitularId: c.fiscalTitularId,
+                            fiscalSubstitutoId: c.fiscalSubstitutoId,
+                            contracts: []
+                          };
+                          groups.push(group);
+                        }
+                        group.contracts.push(c);
+                      });
+
+                      return groups.map((g: ContractGroup, groupIdx: number) => {
+                        const titular = fiscais.find(f => f.id === g.fiscalTitularId);
+                        const substituto = fiscais.find(f => f.id === g.fiscalSubstitutoId);
+                        
+                        const formatFiscalName = (f: Fiscal | undefined) => {
+                          if (!f) return 'Não designado';
+                          const rank = f.postoGraduacao;
+                          const fullName = f.name.toUpperCase();
+                          const warName = f.warName ? f.warName.toUpperCase() : '';
+                          return `${rank} ${fullName}${warName ? ` (${rank} ${warName})` : ''}`;
+                        };
+
+                        return (
+                          <div key={`${g.fiscalTitularId}-${g.fiscalSubstitutoId}-${groupIdx}`} className="space-y-3">
+                            <div className="space-y-3">
+                              {g.contracts.map((c: Contract) => (
+                                <div key={c.id} className="space-y-1">
+                                  <p><span className="font-bold font-sans">Nr Contrato:</span> {c.number}</p>
+                                  <p><span className="font-bold font-sans">Empresa:</span> <span className="font-bold uppercase font-sans">{c.contractorName.toUpperCase()}</span></p>
+                                  <p><span className="font-bold font-sans">CNPJ:</span> {formatCpfCnpj(c.cnpj)}</p>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="space-y-1">
+                              <p className="pl-6 font-sans">
+                                a) Fiscal de Contrato Titular: {formatFiscalName(titular)}
+                              </p>
+                              <p className="pl-6 font-sans">
+                                b) Fiscal de Contrato Substituto: {formatFiscalName(substituto)}
+                              </p>
+                            </div>
+                            {groupIdx < groups.length - 1 && (
+                              <div className="py-2">
+                                <div className="border-t border-slate-900 my-2" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y-2 divide-slate-950 border-collapse border border-slate-350 text-[11px] leading-tight" id="report-table">
                   <thead className="bg-slate-100 font-bold">
                     {reportType === 'logs' ? (
                       <tr>
@@ -2750,9 +2861,10 @@ export default function App() {
                   </tbody>
                 </table>
               </div>
+              )}
 
               {/* Total Aggregate math footer for printable format */}
-              {reportType !== 'logs' && reportType !== 'efetivo_fiscais' && getReportData().reportList.length > 0 && (
+              {reportType !== 'logs' && reportType !== 'efetivo_fiscais' && reportType !== 'designacao_fiscais' && getReportData().reportList.length > 0 && (
                 <div className="flex justify-end pt-2 border-t border-slate-200">
                   <div className="p-3.5 bg-slate-50 border border-slate-200 text-right space-y-1 rounded">
                     <p className="text-[10px] text-slate-500 uppercase tracking-wider">Metrificação da Amostra</p>
