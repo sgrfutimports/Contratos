@@ -16,4 +16,21 @@
   --color-emerald-800: var(--theme-800, #065f46);
   --color-emerald-900: var(--theme-900, #064e3b);
   --color-emerald-950: var(--theme-950, #022c22);
+
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+  body {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  #printable-area {
+    padding: 2cm !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 }
