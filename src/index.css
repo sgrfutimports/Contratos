@@ -17,3 +17,9 @@
   --color-emerald-900: var(--theme-900, #064e3b);
   --color-emerald-950: var(--theme-950, #022c22);
 }
+
+/* Standardize all reports to Times New Roman, size 12pt */
+#printable-area, #printable-area * {
+  font-family: "Times New Roman", Times, serif !important;
+  font-size: 12pt !important;
+}

@@ -2618,7 +2618,7 @@ export default function App() {
             </div>
 
             {/* Officially formatted Brazilian Army Report (A4 stylized) */}
-            <div className="bg-white text-slate-900 p-8 md:p-12 rounded-xl shadow-2xl border border-slate-700/20 max-w-4xl mx-auto print:shadow-none print:border-none print:p-0 print:my-0 text-xs space-y-8 animate-fadeIn" id="printable-area" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+            <div className="bg-white text-slate-900 p-8 md:p-12 rounded-xl shadow-2xl border border-slate-700/20 max-w-4xl mx-auto print:shadow-none print:border-none print:p-0 print:my-0 text-xs space-y-8 animate-fadeIn" id="printable-area" style={{ fontFamily: '"Times New Roman", Times, serif', fontSize: '12pt' }}>
               
               {/* Printable military official coat styling */}
               <div className="text-center text-slate-900 space-y-1 border-b-2 border-slate-950 pb-4 flex flex-col items-center">
@@ -2637,11 +2637,7 @@ export default function App() {
                 <h2 className="text-center text-sm font-bold uppercase tracking-wide">
                   {getReportData().title}
                 </h2>
-                <div className="flex justify-between items-center text-[10px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200">
-                  <span>BASELINE SISTÊMICA INTERNA: 21 DE MAIO DE 2026</span>
-                  <span className="uppercase">71º BATALHÃO DE INFANTARIA MOTORIZADO - GARANHUNS-PE</span>
-                  <span>AUTOR: {currentUser.name.toUpperCase()} ({currentUser.role.toUpperCase()})</span>
-                </div>
+
               </div>
 
               {/* Report Content representation */}
