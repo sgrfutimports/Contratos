@@ -2618,15 +2618,15 @@ export default function App() {
             </div>
 
             {/* Officially formatted Brazilian Army Report (A4 stylized) */}
-            <div className="bg-white text-slate-900 p-8 md:p-12 rounded-xl shadow-2xl border border-slate-700/20 max-w-4xl mx-auto print:shadow-none print:border-none print:p-0 print:my-0 text-xs space-y-8 animate-fadeIn" id="printable-area" style={{ fontFamily: '"Times New Roman", Times, serif', fontSize: '12pt' }}>
+            <div className="bg-white text-slate-900 p-8 md:p-12 rounded-xl shadow-2xl border border-slate-700/20 max-w-4xl mx-auto print:shadow-none print:border-none print:p-0 print:my-0 space-y-8 animate-fadeIn" id="printable-area" style={{ fontFamily: '"Times New Roman", Times, serif', fontSize: '10pt' }}>
               
               {/* Printable military official coat styling */}
-              <div className="text-center text-slate-900 space-y-1 border-b-2 border-slate-950 pb-4 flex flex-col items-center">
+              <div className="text-center text-slate-900 border-b-2 border-slate-950 pb-4 flex flex-col items-center" style={{ lineHeight: '1.0' }}>
                 <img src="/brasao.png" alt="Brasão das Armas do Brasil" className="h-16 w-auto mb-2" />
-                <p className="font-bold uppercase tracking-widest text-sm leading-tight font-sans">MINISTÉRIO DA DEFESA</p>
-                <p className="font-bold uppercase tracking-widest text-sm leading-tight font-sans">EXÉRCITO BRASILEIRO</p>
-                <p className="uppercase text-xs leading-tight font-bold font-sans">71º BATALHÃO DE INFANTARIA MOTORIZADO</p>
-                <p className="uppercase text-[10px] font-bold font-sans text-slate-700">(BATALHÃO DUARTE COELHO/1993)</p>
+                <p className="font-bold uppercase tracking-widest text-[10pt]">MINISTÉRIO DA DEFESA</p>
+                <p className="font-bold uppercase tracking-widest text-[10pt]">EXÉRCITO BRASILEIRO</p>
+                <p className="uppercase font-bold text-[10pt]">71º BATALHÃO DE INFANTARIA MOTORIZADO</p>
+                <p className="uppercase font-bold text-[10pt] text-slate-700">(BATALHÃO DUARTE COELHO/1993)</p>
                 <div className="pt-2">
                   <div className="h-1 w-20 bg-slate-900 mx-auto" />
                 </div>
@@ -2637,17 +2637,21 @@ export default function App() {
                 <h2 className="text-center text-sm font-bold uppercase tracking-wide">
                   {getReportData().title}
                 </h2>
-
+                <div className="flex justify-between items-center text-[10px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200">
+                  <span>BASELINE SISTÊMICA INTERNA: 21 DE MAIO DE 2026</span>
+                  <span className="uppercase">71º BATALHÃO DE INFANTARIA MOTORIZADO - GARANHUNS-PE</span>
+                  <span>AUTOR: {currentUser.name.toUpperCase()} ({currentUser.role.toUpperCase()})</span>
+                </div>
               </div>
 
               {/* Report Content representation */}
               {reportType === 'designacao_fiscais' ? (
-                <div className="text-slate-900 text-xs space-y-6 leading-relaxed" id="report-text-content">
-                  <p className="text-justify font-sans">
+                <div className="text-slate-900 space-y-6" id="report-text-content">
+                  <p className="text-justify" style={{ lineHeight: '1.25' }}>
                     Conforme prescreve o Art nº 117, da Lei nº 14.133 de 1º de abril de 2021, designo os militares abaixo relacionados, para cumprir as atribuições de Fiscal de Contrato, celebrado com os respectivos prestadores de serviços:
                   </p>
                   
-                  <div className="space-y-4 font-sans text-left font-normal text-slate-900 leading-normal">
+                  <div className="space-y-4 text-left font-normal text-slate-900">
                     {getReportData().reportList.length === 0 ? (
                       <p className="text-center py-6 text-slate-500 italic border border-slate-300">
                         Nenhum contrato passível de designação sob os critérios especificados.
@@ -2686,20 +2690,20 @@ export default function App() {
 
                         return (
                           <div key={`${g.fiscalTitularId}-${g.fiscalSubstitutoId}-${groupIdx}`} className="space-y-3">
-                            <div className="space-y-3">
+                            <div className="space-y-3" style={{ lineHeight: '1.0' }}>
                               {g.contracts.map((c: Contract) => (
                                 <div key={c.id} className="space-y-1">
-                                  <p><span className="font-bold font-sans">Nr Contrato:</span> {c.number}</p>
-                                  <p><span className="font-bold font-sans">Empresa:</span> <span className="font-bold uppercase font-sans">{c.contractorName.toUpperCase()}</span></p>
-                                  <p><span className="font-bold font-sans">CNPJ:</span> {formatCpfCnpj(c.cnpj)}</p>
+                                  <p><span className="font-bold">Nr Contrato:</span> {c.number}</p>
+                                  <p><span className="font-bold">Empresa:</span> <span className="font-bold uppercase">{c.contractorName.toUpperCase()}</span></p>
+                                  <p><span className="font-bold">CNPJ:</span> {formatCpfCnpj(c.cnpj)}</p>
                                 </div>
                               ))}
                             </div>
-                            <div className="space-y-1">
-                              <p className="pl-6 font-sans">
+                            <div className="space-y-1" style={{ lineHeight: '1.25' }}>
+                              <p className="pl-6">
                                 a) Fiscal de Contrato Titular: {formatFiscalName(titular)}
                               </p>
-                              <p className="pl-6 font-sans">
+                              <p className="pl-6">
                                 b) Fiscal de Contrato Substituto: {formatFiscalName(substituto)}
                               </p>
                             </div>
@@ -2716,7 +2720,7 @@ export default function App() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y-2 divide-slate-950 border-collapse border border-slate-350 text-[11px] leading-tight" id="report-table">
+                  <table className="min-w-full divide-y-2 divide-slate-950 border-collapse border border-slate-350 text-[10pt] leading-[1.25]" id="report-table">
                   <thead className="bg-slate-100 font-bold">
                     {reportType === 'logs' ? (
                       <tr>
