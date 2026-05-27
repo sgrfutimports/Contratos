@@ -2623,10 +2623,10 @@ export default function App() {
               {/* Printable military official coat styling */}
               <div className="text-center text-slate-900 border-b-2 border-slate-950 pb-4 flex flex-col items-center" style={{ lineHeight: '1.0' }}>
                 <img src="/brasao.png" alt="Brasão das Armas do Brasil" className="h-16 w-auto mb-2" />
-                <p className="font-bold uppercase tracking-widest text-[10pt]">MINISTÉRIO DA DEFESA</p>
-                <p className="font-bold uppercase tracking-widest text-[10pt]">EXÉRCITO BRASILEIRO</p>
-                <p className="uppercase font-bold text-[10pt]">71º BATALHÃO DE INFANTARIA MOTORIZADO</p>
-                <p className="uppercase font-bold text-[10pt] text-slate-700">(BATALHÃO DUARTE COELHO/1993)</p>
+                <p className="font-bold uppercase tracking-widest text-[12pt]">MINISTÉRIO DA DEFESA</p>
+                <p className="font-bold uppercase tracking-widest text-[12pt]">EXÉRCITO BRASILEIRO</p>
+                <p className="uppercase font-bold text-[12pt]">71º BATALHÃO DE INFANTARIA MOTORIZADO</p>
+                <p className="uppercase font-bold text-[12pt] text-slate-700">(BATALHÃO DUARTE COELHO/1993)</p>
                 <div className="pt-2">
                   <div className="h-1 w-20 bg-slate-900 mx-auto" />
                 </div>
@@ -2634,14 +2634,9 @@ export default function App() {
 
               {/* Report Title */}
               <div className="space-y-2">
-                <h2 className="text-center text-sm font-bold uppercase tracking-wide">
+                <h2 className="text-center text-[12pt] font-bold uppercase tracking-wide">
                   {getReportData().title}
                 </h2>
-                <div className="flex justify-between items-center text-[10px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200">
-                  <span>BASELINE SISTÊMICA INTERNA: 21 DE MAIO DE 2026</span>
-                  <span className="uppercase">71º BATALHÃO DE INFANTARIA MOTORIZADO - GARANHUNS-PE</span>
-                  <span>AUTOR: {currentUser.name.toUpperCase()} ({currentUser.role.toUpperCase()})</span>
-                </div>
               </div>
 
               {/* Report Content representation */}
@@ -2815,7 +2810,7 @@ export default function App() {
                                   <span className="block font-bold mt-0.5">({item.warName})</span>
                                 )}
                               </td>
-                              <td className="border border-slate-300 p-2 text-center font-mono whitespace-nowrap">{item.cpf}</td>
+                              <td className="border border-slate-300 p-2 text-center whitespace-nowrap">{item.cpf}</td>
                               <td className="border border-slate-300 p-2 text-center text-[10px] whitespace-normal break-words">{item.email}<br/>{item.phone}</td>
                             </tr>
                           );
@@ -2834,7 +2829,7 @@ export default function App() {
                                 )}
                                 <span className="block text-[10px] text-slate-500 mt-1 font-mono uppercase">LGN: {item.username}</span>
                               </td>
-                              <td className="border border-slate-300 p-2 text-center font-mono whitespace-nowrap">{item.cpf}</td>
+                              <td className="border border-slate-300 p-2 text-center whitespace-nowrap">{item.cpf}</td>
                               <td className="border border-slate-300 p-2 text-center whitespace-nowrap font-bold uppercase text-[10px]">{item.role}</td>
                             </tr>
                           );
