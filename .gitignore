@@ -14,6 +14,8 @@ coverage/
 database/*.sqlite
 database/*.sqlite-shm
 database/*.sqlite-wal
+!database/db.sqlite
+
 
 # Log and Upload directories
 backups/
